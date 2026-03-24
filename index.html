@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>William Boland</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0d0d0d;
+      --paper: #f5f0e8;
+      --accent: #e84c2b;
+      --accent2: #f5c842;
+      --mid: #c2b9a7;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', sans-serif;
+      --display: 'Bebas Neue', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+      mix-blend-mode: multiply;
+    }
+    .cursor.expand {
+      width: 40px; height: 40px;
+      background: var(--accent2);
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.4;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left {
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left::after {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      border: 2px solid rgba(245,200,66,0.15);
+      border-radius: 50%;
+      animation: pulse 4s ease-in-out infinite;
+    }
+    .hero-left::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      border: 1px solid rgba(232,76,43,0.2);
+      border-radius: 50%;
+      animation: pulse 4s ease-in-out infinite 1s;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .hero-tag {
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 0.2s;
+    }
+
+    .hero-name {
+      font-family: var(--display);
+      font-size: clamp(4.5rem, 9vw, 8rem);
+      line-height: 0.92;
+      color: var(--paper);
+      letter-spacing: 0.01em;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 0.4s;
+    }
+
+    .hero-name span {
+      display: block;
+      color: var(--accent2);
+    }
+
+    .hero-location {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--mid);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 0.6s;
+    }
+
+    .hero-location::before {
+      content: '◉';
+      color: var(--accent);
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero-right {
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 3rem 3rem 4rem;
+      position: relative;
+    }
+
+    .big-role {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 0.5s;
+    }
+
+    .big-role em {
+      font-style: normal;
+      color: var(--accent);
+      position: relative;
+    }
+
+    .big-role em::after {
+      content: '';
+      position: absolute;
+      bottom: 2px; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent2);
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underline 0.6s forwards 1.2s;
+    }
+
+    @keyframes underline {
+      to { transform: scaleX(1); }
+    }
+
+    .divider {
+      width: 60px;
+      height: 2px;
+      background: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 0.7s;
+    }
+
+    .hero-bio {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: #444;
+      max-width: 420px;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 0.8s;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      right: 3rem;
+      writing-mode: vertical-rl;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s forwards 1.2s;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: var(--mid);
+      animation: grow 1.5s ease-in-out infinite 1.5s;
+    }
+
+    @keyframes grow {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      51% { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* ── ABOUT ── */
+    .about {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      position: relative;
+    }
+
+    .about-label-col {
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-label-col::before {
+      content: 'ABOUT';
+      font-family: var(--display);
+      font-size: clamp(5rem, 12vw, 10rem);
+      color: rgba(0,0,0,0.08);
+      position: absolute;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .about-num {
+      font-family: var(--display);
+      font-size: 8rem;
+      color: var(--ink);
+      opacity: 0.15;
+      line-height: 1;
+    }
+
+    .about-content {
+      padding: 5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .section-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-headline {
+      font-family: var(--display);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      margin-bottom: 2.5rem;
+    }
+
+    .about-headline .line2 {
+      color: var(--accent);
+    }
+
+    .about-body {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #3a3a3a;
+      max-width: 560px;
+      margin-bottom: 3rem;
+    }
+
+    .about-body strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .tag {
+      padding: 0.4rem 1rem;
+      border: 1.5px solid var(--ink);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: none;
+    }
+
+    .tag:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .tag.accent-tag {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* ── CALLOUT STRIP ── */
+    .callout {
+      background: var(--ink);
+      padding: 3rem;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .callout-text {
+      font-family: var(--display);
+      font-size: clamp(2rem, 5vw, 4rem);
+      color: var(--paper);
+      white-space: nowrap;
+      animation: marquee 20s linear infinite;
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .callout-text span { color: var(--accent2); }
+    .callout-text em { color: var(--accent); font-style: normal; }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--paper);
+      border-top: 2px solid var(--ink);
+      padding: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .footer-name {
+      font-family: var(--display);
+      font-size: clamp(2rem, 5vw, 4rem);
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .footer-name span { color: var(--accent); }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: var(--mid);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+    }
+
+    .footer-cta {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 1rem 2.5rem;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+      cursor: none;
+    }
+
+    .footer-cta:hover {
+      background: var(--ink);
+      transform: translate(-3px, -3px);
+      box-shadow: 3px 3px 0 var(--accent2);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { min-height: 55vh; padding: 2.5rem 2rem; justify-content: flex-end; }
+      .hero-right { padding: 2.5rem 2rem; }
+      .about { grid-template-columns: 1fr; }
+      .about-label-col { min-height: 120px; }
+      .about-content { padding: 3rem 2rem; }
+      .footer { flex-direction: column; align-items: flex-start; }
+      .scroll-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">Web Developer · Applicant</div>
+      <h1 class="hero-name">
+        William
+        <span>Boland</span>
+      </h1>
+      <div class="hero-location">South Africa · Available Now</div>
+    </div>
+    <div class="hero-right">
+      <p class="big-role">Applying for <em>Web Developer</em><br>at the Jubileum Board.</p>
+      <div class="divider"></div>
+      <p class="hero-bio">
+        Currently based in South Africa, bringing fresh perspective and bold ideas to web development — from interactive experiences to forward-thinking digital strategies.
+      </p>
+      <div class="scroll-hint">Scroll</div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="about-label-col">
+      <div class="about-num">01</div>
+    </div>
+    <div class="about-content">
+      <div class="section-eyebrow">About me</div>
+      <h2 class="about-headline">
+        IDEAS THAT<br>
+        <span class="line2">BUILD THINGS.</span>
+      </h2>
+      <p class="about-body">
+        I'm <strong>William Boland</strong> — a web developer with a drive to create digital experiences that don't just look good, but <strong>work beautifully</strong>. I'm currently based in South Africa and actively looking to bring my energy and skill set to the <strong>Jubileum Board</strong>.
+        <br><br>
+        I come with great ideas for both the development of the web presence and further strategic action — from building engaging, accessible interfaces to thinking about what the next step should be.
+      </p>
+      <div class="tags">
+        <span class="tag accent-tag">Jubileum Board</span>
+        <span class="tag">Web Development</span>
+        <span class="tag">UI / UX</span>
+        <span class="tag">Creative Thinking</span>
+        <span class="tag">South Africa</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE STRIP -->
+  <div class="callout" aria-hidden="true">
+    <div class="callout-text">
+      WILLIAM BOLAND &nbsp;<span>✦</span>&nbsp; WEB DEVELOPER &nbsp;<em>✦</em>&nbsp;
+      JUBILEUM BOARD &nbsp;<span>✦</span>&nbsp; BOLD IDEAS &nbsp;<em>✦</em>&nbsp;
+      SOUTH AFRICA &nbsp;<span>✦</span>&nbsp; LET'S BUILD SOMETHING &nbsp;<em>✦</em>&nbsp;
+      WILLIAM BOLAND &nbsp;<span>✦</span>&nbsp; WEB DEVELOPER &nbsp;<em>✦</em>&nbsp;
+      JUBILEUM BOARD &nbsp;<span>✦</span>&nbsp; BOLD IDEAS &nbsp;<em>✦</em>&nbsp;
+      SOUTH AFRICA &nbsp;<span>✦</span>&nbsp; LET'S BUILD SOMETHING &nbsp;<em>✦</em>&nbsp;
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>
+      <div class="footer-name">William <span>Boland</span></div>
+      <div class="footer-note">Web Developer · Open to opportunities</div>
+    </div>
+    <a href="mailto:william@example.com" class="footer-cta">Get in touch →</a>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, .tag, .footer-cta').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('expand'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('expand'));
+    });
+
+    // Scroll-triggered fade for about section
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.about-content > *').forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = `opacity 0.7s ease ${i * 0.12}s, transform 0.7s ease ${i * 0.12}s`;
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
