@@ -1,548 +1,450 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>William Boland</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <title>RING NÅ! – Vibe Coder til Jubileet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&family=Oswald:wght@400;500;700&family=Special+Elite&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --ink: #0d0d0d;
-      --paper: #f5f0e8;
-      --accent: #e84c2b;
-      --accent2: #f5c842;
-      --mid: #c2b9a7;
-      --serif: 'DM Serif Display', Georgia, serif;
-      --sans: 'DM Sans', sans-serif;
-      --display: 'Bebas Neue', sans-serif;
+      --gold: #f5c800;
+      --gold2: #e6a800;
+      --dark: #1a1200;
+      --red: #c0000a;
+      --cream: #fdf6e3;
+      --brown: #3b2800;
+      --shadow: #8b6400;
     }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--paper);
-      color: var(--ink);
-      font-family: var(--sans);
+      font-family: 'Oswald', sans-serif;
+      background: var(--cream);
+      color: var(--dark);
       overflow-x: hidden;
-      cursor: none;
     }
 
-    /* Custom cursor */
-    .cursor {
-      width: 12px; height: 12px;
-      background: var(--accent);
-      border-radius: 50%;
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
-      mix-blend-mode: multiply;
-    }
-    .cursor.expand {
-      width: 40px; height: 40px;
-      background: var(--accent2);
-    }
-
-    /* Noise overlay */
-    body::before {
+    /* SCANLINES */
+    body::after {
       content: '';
       position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
       pointer-events: none;
-      z-index: 100;
-      opacity: 0.4;
+      z-index: 9998;
     }
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      position: relative;
+    /* TICKER */
+    .ticker-wrap {
+      background: var(--red);
+      color: white;
+      padding: 0.45rem 0;
       overflow: hidden;
-    }
-
-    .hero-left {
-      background: var(--ink);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 3rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-left::after {
-      content: '';
-      position: absolute;
-      top: -80px; right: -80px;
-      width: 300px; height: 300px;
-      border: 2px solid rgba(245,200,66,0.15);
-      border-radius: 50%;
-      animation: pulse 4s ease-in-out infinite;
-    }
-    .hero-left::before {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 200px; height: 200px;
-      border: 1px solid rgba(232,76,43,0.2);
-      border-radius: 50%;
-      animation: pulse 4s ease-in-out infinite 1s;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.1); opacity: 1; }
-    }
-
-    .hero-tag {
-      font-family: var(--sans);
-      font-weight: 500;
-      font-size: 0.7rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 0.2s;
-    }
-
-    .hero-name {
-      font-family: var(--display);
-      font-size: clamp(4.5rem, 9vw, 8rem);
-      line-height: 0.92;
-      color: var(--paper);
-      letter-spacing: 0.01em;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 0.4s;
-    }
-
-    .hero-name span {
-      display: block;
-      color: var(--accent2);
-    }
-
-    .hero-location {
-      margin-top: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--mid);
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 0.6s;
-    }
-
-    .hero-location::before {
-      content: '◉';
-      color: var(--accent);
-      animation: blink 2s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .hero-right {
-      background: var(--paper);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 3rem 3rem 3rem 4rem;
-      position: relative;
-    }
-
-    .big-role {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: clamp(1.8rem, 3.5vw, 3rem);
-      line-height: 1.2;
-      color: var(--ink);
-      margin-bottom: 2rem;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 0.5s;
-    }
-
-    .big-role em {
-      font-style: normal;
-      color: var(--accent);
-      position: relative;
-    }
-
-    .big-role em::after {
-      content: '';
-      position: absolute;
-      bottom: 2px; left: 0; right: 0;
-      height: 3px;
-      background: var(--accent2);
-      transform: scaleX(0);
-      transform-origin: left;
-      animation: underline 0.6s forwards 1.2s;
-    }
-
-    @keyframes underline {
-      to { transform: scaleX(1); }
-    }
-
-    .divider {
-      width: 60px;
-      height: 2px;
-      background: var(--accent);
-      margin-bottom: 1.5rem;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 0.7s;
-    }
-
-    .hero-bio {
+      white-space: nowrap;
+      font-family: 'Passion One', cursive;
       font-size: 1rem;
-      line-height: 1.75;
-      color: #444;
-      max-width: 420px;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 0.8s;
+      letter-spacing: 0.08em;
+      border-top: 3px solid var(--gold);
+      border-bottom: 3px solid var(--gold);
     }
+    .ticker-inner { display: inline-block; animation: ticker 20s linear infinite; }
+    @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
 
-    .scroll-hint {
-      position: absolute;
-      bottom: 2rem;
-      right: 3rem;
-      writing-mode: vertical-rl;
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--mid);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      opacity: 0;
-      animation: fadeUp 0.8s forwards 1.2s;
+    /* HERO */
+    .hero {
+      background: var(--gold);
+      background-image: radial-gradient(ellipse at 20% 50%, #ffe066 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, #c88800 0%, transparent 60%);
+      position: relative;
+      overflow: hidden;
     }
-
-    .scroll-hint::after {
+    .hero::before {
       content: '';
-      width: 1px;
-      height: 40px;
-      background: var(--mid);
-      animation: grow 1.5s ease-in-out infinite 1.5s;
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(0,0,0,0.05) 18px, rgba(0,0,0,0.05) 20px);
     }
-
-    @keyframes grow {
-      0% { transform: scaleY(0); transform-origin: top; }
-      50% { transform: scaleY(1); transform-origin: top; }
-      51% { transform: scaleY(1); transform-origin: bottom; }
-      100% { transform: scaleY(0); transform-origin: bottom; }
-    }
-
-    /* ── ABOUT ── */
-    .about {
-      min-height: 100vh;
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto;
+      padding: 2.5rem 2rem;
       display: grid;
-      grid-template-columns: 1fr 2fr;
-      position: relative;
-    }
-
-    .about-label-col {
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .about-label-col::before {
-      content: 'ABOUT';
-      font-family: var(--display);
-      font-size: clamp(5rem, 12vw, 10rem);
-      color: rgba(0,0,0,0.08);
-      position: absolute;
-      writing-mode: vertical-rl;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-    }
-
-    .about-num {
-      font-family: var(--display);
-      font-size: 8rem;
-      color: var(--ink);
-      opacity: 0.15;
-      line-height: 1;
-    }
-
-    .about-content {
-      padding: 5rem 4rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .section-eyebrow {
-      font-size: 0.68rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 500;
-      margin-bottom: 1.5rem;
-    }
-
-    .about-headline {
-      font-family: var(--display);
-      font-size: clamp(3rem, 6vw, 5.5rem);
-      line-height: 0.95;
-      letter-spacing: 0.02em;
-      color: var(--ink);
-      margin-bottom: 2.5rem;
-    }
-
-    .about-headline .line2 {
-      color: var(--accent);
-    }
-
-    .about-body {
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: #3a3a3a;
-      max-width: 560px;
-      margin-bottom: 3rem;
-    }
-
-    .about-body strong {
-      color: var(--ink);
-      font-weight: 500;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-    }
-
-    .tag {
-      padding: 0.4rem 1rem;
-      border: 1.5px solid var(--ink);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: none;
-    }
-
-    .tag:hover {
-      background: var(--ink);
-      color: var(--paper);
-    }
-
-    .tag.accent-tag {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: white;
-    }
-
-    /* ── CALLOUT STRIP ── */
-    .callout {
-      background: var(--ink);
-      padding: 3rem;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      align-items: center;
+      grid-template-columns: 1.1fr 1fr;
       gap: 2rem;
-    }
-
-    .callout-text {
-      font-family: var(--display);
-      font-size: clamp(2rem, 5vw, 4rem);
-      color: var(--paper);
-      white-space: nowrap;
-      animation: marquee 20s linear infinite;
-      display: flex;
-      gap: 3rem;
       align-items: center;
     }
+    @media (max-width: 680px) { .hero-inner { grid-template-columns: 1fr; } }
 
-    .callout-text span { color: var(--accent2); }
-    .callout-text em { color: var(--accent); font-style: normal; }
-
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-
-    /* ── FOOTER ── */
-    .footer {
-      background: var(--paper);
-      border-top: 2px solid var(--ink);
-      padding: 3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 2rem;
-    }
-
-    .footer-name {
-      font-family: var(--display);
-      font-size: clamp(2rem, 5vw, 4rem);
-      color: var(--ink);
-      line-height: 1;
-    }
-
-    .footer-name span { color: var(--accent); }
-
-    .footer-note {
-      font-size: 0.75rem;
-      color: var(--mid);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-top: 0.5rem;
-    }
-
-    .footer-cta {
+    .hero-eyebrow {
       display: inline-block;
-      background: var(--accent);
+      background: var(--red);
       color: white;
-      padding: 1rem 2.5rem;
-      font-family: var(--sans);
-      font-size: 0.8rem;
-      font-weight: 500;
+      font-family: 'Passion One', cursive;
+      font-size: 0.9rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.2s;
-      cursor: none;
+      padding: 0.3rem 1rem;
+      transform: skewX(-6deg);
+      margin-bottom: 0.75rem;
     }
+    .hero-title {
+      font-family: 'Passion One', cursive;
+      font-size: clamp(3rem, 9vw, 6.5rem);
+      font-weight: 900;
+      line-height: 0.9;
+      color: var(--dark);
+      text-transform: uppercase;
+      text-shadow: 4px 4px 0 var(--shadow), 6px 6px 0 rgba(0,0,0,0.15);
+      margin-bottom: 0.5rem;
+    }
+    .hero-title .big { font-size: clamp(4rem, 12vw, 9rem); display: block; color: var(--brown); }
+    .hero-subtitle {
+      font-family: 'Special Elite', cursive;
+      font-size: 1.15rem; color: var(--brown);
+      margin: 0.75rem 0 1.25rem; line-height: 1.5;
+    }
+    .hero-tel {
+      display: inline-block;
+      background: var(--dark); color: var(--gold);
+      font-family: 'Passion One', cursive;
+      font-size: 2.2rem;
+      letter-spacing: 0.04em;
+      padding: 0.6rem 1.5rem;
+      border: 4px solid var(--gold);
+      transform: skewX(-4deg);
+      box-shadow: 5px 5px 0 var(--shadow);
+      animation: pulse-border 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-border {
+      from { box-shadow: 5px 5px 0 var(--shadow); }
+      to   { box-shadow: 5px 5px 0 var(--shadow), 0 0 20px var(--gold); }
+    }
+    .hero-disclaimer { font-size: 0.62rem; color: var(--brown); opacity: 0.6; margin-top: 0.5rem; font-family: 'Special Elite', cursive; }
 
-    .footer-cta:hover {
-      background: var(--ink);
-      transform: translate(-3px, -3px);
-      box-shadow: 3px 3px 0 var(--accent2);
+    /* PHOTO */
+    .photo-polaroid {
+      background: white;
+      padding: 12px 12px 48px;
+      box-shadow: 6px 6px 0 var(--brown), 10px 10px 0 rgba(0,0,0,0.15);
+      transform: rotate(2.5deg);
+      transition: transform 0.2s;
+      cursor: pointer;
+      max-width: 280px; margin: 0 auto;
+      position: relative;
     }
+    .photo-polaroid:hover { transform: rotate(0deg) scale(1.03); }
+    .photo-polaroid-img {
+      width: 100%; aspect-ratio: 1;
+      background: #f0e8d0;
+      display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.5rem;
+      overflow: hidden;
+    }
+    .photo-polaroid-img img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .photo-placeholder-text { text-align: center; font-family: 'Special Elite', cursive; font-size: 0.8rem; color: #888; padding: 1rem; }
+    .photo-placeholder-text .big-emoji { font-size: 2.5rem; display: block; margin-bottom: 0.4rem; }
+    .photo-caption { font-family: 'Special Elite', cursive; font-size: 0.95rem; color: var(--brown); text-align: center; padding-top: 6px; }
+    .stamp {
+      position: absolute; top: -12px; right: -18px;
+      background: var(--red); color: white;
+      font-family: 'Passion One', cursive; font-size: 0.7rem;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 0.5rem 0.6rem; border-radius: 50%;
+      width: 68px; height: 68px;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; line-height: 1.1;
+      border: 2px dashed rgba(255,255,255,0.5);
+      animation: spin-slow 12s linear infinite;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    }
+    @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    #fileInput { display: none; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    /* DIVIDERS */
+    .slant { height: 60px; background: var(--dark); clip-path: polygon(0 0, 100% 40%, 100% 100%, 0 100%); margin-top: -2px; }
+    .slant-up { height: 60px; background: var(--dark); clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%); margin-bottom: -2px; }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      .hero { grid-template-columns: 1fr; }
-      .hero-left { min-height: 55vh; padding: 2.5rem 2rem; justify-content: flex-end; }
-      .hero-right { padding: 2.5rem 2rem; }
-      .about { grid-template-columns: 1fr; }
-      .about-label-col { min-height: 120px; }
-      .about-content { padding: 3rem 2rem; }
-      .footer { flex-direction: column; align-items: flex-start; }
-      .scroll-hint { display: none; }
+    /* DARK SECTION */
+    .dark-section { background: var(--dark); padding: 3rem 2rem; color: var(--gold); }
+    .dark-section-inner { max-width: 1000px; margin: 0 auto; }
+    .section-label { font-family: 'Passion One', cursive; font-size: 0.85rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+    .section-title { font-family: 'Passion One', cursive; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1; margin-bottom: 1.75rem; text-transform: uppercase; }
+
+    .about-text { font-family: 'Special Elite', cursive; font-size: 1rem; line-height: 1.85; color: #c8a820; max-width: 700px; margin-bottom: 2rem; }
+    .about-text strong { font-family: 'Passion One', cursive; font-size: 1.05em; color: var(--gold); letter-spacing: 0.03em; }
+
+    /* SKILLS */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; border: 1px solid var(--gold2); }
+    .skill-item {
+      padding: 1.25rem; border: 1px solid var(--gold2);
+      position: relative; overflow: hidden; transition: background 0.2s;
     }
+    .skill-item:hover { background: rgba(245,200,0,0.08); }
+    .skill-item::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(245,200,0,0.03) 8px, rgba(245,200,0,0.03) 9px);
+    }
+    .skill-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .skill-name { font-family: 'Passion One', cursive; font-size: 1.1rem; color: var(--gold); text-transform: uppercase; }
+    .skill-desc { font-family: 'Special Elite', cursive; font-size: 0.72rem; color: #a08820; margin-top: 0.2rem; line-height: 1.4; }
+    .skill-meter { margin-top: 0.6rem; height: 4px; background: rgba(255,255,255,0.1); }
+    .skill-meter-fill { height: 100%; background: var(--gold); }
+
+    /* TESTIMONIALS */
+    .testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+    .testimonial { background: rgba(245,200,0,0.06); border: 1px solid rgba(245,200,0,0.2); padding: 1.25rem; position: relative; }
+    .testimonial::before { content: '"'; font-family: 'Passion One', cursive; font-size: 4rem; color: var(--gold); opacity: 0.15; position: absolute; top: -10px; left: 8px; line-height: 1; }
+    .testimonial p { font-family: 'Special Elite', cursive; font-size: 0.82rem; color: #c8a820; line-height: 1.6; }
+    .testimonial cite { display: block; margin-top: 0.75rem; font-family: 'Passion One', cursive; font-size: 0.85rem; color: var(--gold); letter-spacing: 0.05em; }
+
+    /* CREAM SECTION */
+    .cream-section { background: var(--cream); padding: 3rem 2rem; }
+    .cream-section-inner { max-width: 1000px; margin: 0 auto; }
+
+    .guarantee-box {
+      display: flex; gap: 2rem; align-items: center;
+      background: var(--gold); padding: 2rem 2.5rem;
+      border: 4px solid var(--dark); box-shadow: 8px 8px 0 var(--brown);
+      margin-bottom: 2.5rem; position: relative; overflow: hidden;
+    }
+    .guarantee-box::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 12px, rgba(0,0,0,0.04) 12px, rgba(0,0,0,0.04) 14px);
+    }
+    .guarantee-seal {
+      flex-shrink: 0; width: 90px; height: 90px;
+      background: var(--red); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; font-family: 'Passion One', cursive;
+      font-size: 0.75rem; color: white; line-height: 1.15;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      border: 3px dashed rgba(255,255,255,0.5);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.25); z-index: 1;
+    }
+    .guarantee-text { z-index: 1; }
+    .guarantee-text h3 { font-family: 'Passion One', cursive; font-size: 1.6rem; font-weight: 900; color: var(--dark); text-transform: uppercase; margin-bottom: 0.3rem; }
+    .guarantee-text p { font-family: 'Special Elite', cursive; font-size: 0.85rem; color: var(--brown); line-height: 1.6; }
+
+    /* CTA */
+    .cta-banner { background: var(--red); padding: 3rem 2rem; text-align: center; position: relative; overflow: hidden; }
+    .cta-banner::before { content: '★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★'; position: absolute; top: 0; left: 0; right: 0; font-size: 0.9rem; color: rgba(255,255,255,0.2); letter-spacing: 0.3em; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; }
+    .cta-banner::after { content: '★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★'; position: absolute; bottom: 0; left: 0; right: 0; font-size: 0.9rem; color: rgba(255,255,255,0.2); letter-spacing: 0.3em; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; }
+    .cta-inner { max-width: 700px; margin: 0 auto; }
+    .cta-banner h2 { font-family: 'Passion One', cursive; font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 900; color: var(--gold); text-transform: uppercase; text-shadow: 3px 3px 0 rgba(0,0,0,0.3); line-height: 0.95; margin-bottom: 1rem; }
+    .cta-banner p { font-family: 'Special Elite', cursive; color: rgba(255,255,255,0.85); font-size: 1rem; margin-bottom: 1.75rem; line-height: 1.6; }
+    .cta-big-btn {
+      display: inline-block; background: var(--gold); color: var(--dark);
+      font-family: 'Passion One', cursive; font-size: 1.8rem; font-weight: 900;
+      text-transform: uppercase; padding: 0.7rem 3rem;
+      border: 4px solid var(--dark); box-shadow: 5px 5px 0 rgba(0,0,0,0.4);
+      letter-spacing: 0.04em; cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      transform: skewX(-3deg);
+    }
+    .cta-big-btn:hover { transform: skewX(-3deg) translateY(-3px); box-shadow: 5px 8px 0 rgba(0,0,0,0.4); }
+    .cta-big-btn:active { transform: skewX(-3deg) translateY(2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.4); }
+    .fine-print { font-size: 0.58rem; color: rgba(255,255,255,0.4); margin-top: 1rem; font-family: 'Special Elite', cursive; line-height: 1.5; }
+
+    .blink { animation: blink 0.9s step-end infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    footer { background: var(--dark); color: rgba(245,200,0,0.4); text-align: center; padding: 1.25rem 1rem; font-family: 'Special Elite', cursive; font-size: 0.72rem; line-height: 1.7; border-top: 3px solid var(--gold2); }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--gold); border: 4px solid var(--dark); box-shadow: 10px 10px 0 var(--brown); padding: 2.5rem; max-width: 440px; width: 90%; text-align: center; animation: modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    @keyframes modal-pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-box h3 { font-family: 'Passion One', cursive; font-size: 2rem; color: var(--dark); text-transform: uppercase; margin-bottom: 0.5rem; }
+    .modal-box p { font-family: 'Special Elite', cursive; color: var(--brown); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.25rem; }
+    .modal-close { background: var(--dark); color: var(--gold); font-family: 'Passion One', cursive; font-size: 1.1rem; padding: 0.5rem 2rem; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; }
+    .modal-close:hover { background: var(--red); }
   </style>
 </head>
 <body>
 
-  <div class="cursor" id="cursor"></div>
+  <div class="ticker-wrap">
+    <span class="ticker-inner">
+      ★ RING NÅ! ★ JUBILEUM-SPESIALIST ★ 100% RESULTATGARANTERT* ★ KJØP MEG NÅ, ANGRE ALDRI ★ VIBE CODER TIL SALGS ★ RING NÅ! ★ BEGRENSET TILBUD ★ GRATIS KONSULTASJON ★ RING! ★ SPØRRE CHAT ER EN FERDIGHET ★ GITHUB-BRUKER SATT OPP ★ DET ER NOK ★ RING NÅ! ★
+    </span>
+  </div>
 
-  <!-- HERO -->
   <section class="hero">
-    <div class="hero-left">
-      <div class="hero-tag">Web Developer · Applicant</div>
-      <h1 class="hero-name">
-        William
-        <span>Boland</span>
-      </h1>
-      <div class="hero-location">South Africa · Available Now</div>
-    </div>
-    <div class="hero-right">
-      <p class="big-role">Applying for <em>Web Developer</em><br>at the Jubileum Board.</p>
-      <div class="divider"></div>
-      <p class="hero-bio">
-        Currently based in South Africa, bringing fresh perspective and bold ideas to web development — from interactive experiences to forward-thinking digital strategies.
-      </p>
-      <div class="scroll-hint">Scroll</div>
-    </div>
-  </section>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-eyebrow">★ Begrenset tilbud – kun én plass igjen! ★</div>
+        <h1 class="hero-title">
+          TRENGER
+          <span class="big">DU EN<br/>KODER?</span>
+        </h1>
+        <p class="hero-subtitle">
+          Jubileet ditt fortjener en nettside.<br/>
+          Jeg fortjener en sjanse. La oss gjøre dette.
+        </p>
+        <div class="hero-tel"><span class="blink">▶</span>&nbsp;RING MEG NÅ&nbsp;◀</div>
+        <p class="hero-disclaimer">*Resultater kan variere. Ingen refusjon. AI kan bli involvert uten forvarsel.</p>
+      </div>
 
-  <!-- ABOUT -->
-  <section class="about" id="about">
-    <div class="about-label-col">
-      <div class="about-num">01</div>
-    </div>
-    <div class="about-content">
-      <div class="section-eyebrow">About me</div>
-      <h2 class="about-headline">
-        IDEAS THAT<br>
-        <span class="line2">BUILD THINGS.</span>
-      </h2>
-      <p class="about-body">
-        I'm <strong>William Boland</strong> — a web developer with a drive to create digital experiences that don't just look good, but <strong>work beautifully</strong>. I'm currently based in South Africa and actively looking to bring my energy and skill set to the <strong>Jubileum Board</strong>.
-        <br><br>
-        I come with great ideas for both the development of the web presence and further strategic action — from building engaging, accessible interfaces to thinking about what the next step should be.
-      </p>
-      <div class="tags">
-        <span class="tag accent-tag">Jubileum Board</span>
-        <span class="tag">Web Development</span>
-        <span class="tag">UI / UX</span>
-        <span class="tag">Creative Thinking</span>
-        <span class="tag">South Africa</span>
+      <div>
+        <div class="photo-polaroid" onclick="document.getElementById('fileInput').click()">
+          <div class="photo-polaroid-img" id="photoArea">
+            <img id="profileImg" src="" alt="Bilde av søkeren"/>
+            <div class="photo-placeholder-text" id="placeholder">
+              <span class="big-emoji">📸</span>
+              Klikk for å legge til ditt <em>profesjonelle</em> bilde
+            </div>
+          </div>
+          <div class="photo-caption">Din fremtidige web-ekspert</div>
+          <div class="stamp">100%<br/>SERIØS<br/>SØKNAD</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" onchange="loadImage(event)"/>
       </div>
     </div>
   </section>
 
-  <!-- MARQUEE STRIP -->
-  <div class="callout" aria-hidden="true">
-    <div class="callout-text">
-      WILLIAM BOLAND &nbsp;<span>✦</span>&nbsp; WEB DEVELOPER &nbsp;<em>✦</em>&nbsp;
-      JUBILEUM BOARD &nbsp;<span>✦</span>&nbsp; BOLD IDEAS &nbsp;<em>✦</em>&nbsp;
-      SOUTH AFRICA &nbsp;<span>✦</span>&nbsp; LET'S BUILD SOMETHING &nbsp;<em>✦</em>&nbsp;
-      WILLIAM BOLAND &nbsp;<span>✦</span>&nbsp; WEB DEVELOPER &nbsp;<em>✦</em>&nbsp;
-      JUBILEUM BOARD &nbsp;<span>✦</span>&nbsp; BOLD IDEAS &nbsp;<em>✦</em>&nbsp;
-      SOUTH AFRICA &nbsp;<span>✦</span>&nbsp; LET'S BUILD SOMETHING &nbsp;<em>✦</em>&nbsp;
+  <div class="slant"></div>
+
+  <section class="dark-section">
+    <div class="dark-section-inner">
+      <div class="section-label">§ Min livshistorie – kortversjonen</div>
+      <h2 class="section-title">Hvem er din<br/>nye koder?</h2>
+      <p class="about-text">
+        Trenger du en som kan <strong>vibe code</strong> for jubileumet ditt?
+        Da har jeg den <strong>helt riktige personen</strong> for deg!
+        Etter titalls timer med å faktisk lære meg kode, er fortsatt
+        <strong>AI bare bedre enn meg</strong>.
+        På den andre siden har jeg lært et par grunnleggende ting for å kunne kode —
+        som å <strong>spørre Chat</strong>, og sette opp en <strong>GitHub-bruker</strong>.
+        Jeg har <em>veldig</em> lyst til å bruke disse evnene for jubileumet.
+      </p>
+
+      <div class="section-label" style="margin-top:2.5rem;">§ Dokumenterte ferdigheter</div>
+      <h2 class="section-title" style="font-size:2rem; margin-bottom:1rem;">Hva jeg kan tilby</h2>
+
+      <div class="skills-grid">
+        <div class="skill-item">
+          <div class="skill-icon">🤖</div>
+          <div class="skill-name">Prompte ChatGPT</div>
+          <div class="skill-desc">Senior-nivå. Har skrevet «fikse dette» over 200 ganger.</div>
+          <div class="skill-meter"><div class="skill-meter-fill" style="width:96%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-icon">📋</div>
+          <div class="skill-name">Copy-paste</div>
+          <div class="skill-desc">Ctrl+C, Ctrl+V. Uvurderlig verktøy i moderne utvikling.</div>
+          <div class="skill-meter"><div class="skill-meter-fill" style="width:99%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-icon">🐙</div>
+          <div class="skill-name">GitHub</div>
+          <div class="skill-desc">Bruker satt opp. Har lastet opp én fil. Det teller.</div>
+          <div class="skill-meter"><div class="skill-meter-fill" style="width:38%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-icon">🔍</div>
+          <div class="skill-name">Googleing</div>
+          <div class="skill-desc">«hvorfor virker ikke koden» – søk nr. 1 av mange.</div>
+          <div class="skill-meter"><div class="skill-meter-fill" style="width:82%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-icon">🎉</div>
+          <div class="skill-name">Jubileumsvibes</div>
+          <div class="skill-desc">Uovertruffen. Ekte lidenskap. Kan ikke læres.</div>
+          <div class="skill-meter"><div class="skill-meter-fill" style="width:100%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-icon">☕</div>
+          <div class="skill-name">Kode + Kaffe</div>
+          <div class="skill-desc">Kombinasjonen som driver all verdens innovasjon.</div>
+          <div class="skill-meter"><div class="skill-meter-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:3rem;">§ Hva folk sier (tillitsvekkende)</div>
+      <div class="testimonials">
+        <div class="testimonial">
+          <p>Jeg visste ikke at det gikk an å spørre ChatGPT om å skrive kode. Nå vet jeg det. Takket være denne personen.</p>
+          <cite>— En bekjent, anonym</cite>
+        </div>
+        <div class="testimonial">
+          <p>GitHub-brukeren er ekte. Jeg har sjekket. Det er en bruker der. Med et profilbilde og alt.</p>
+          <cite>— Pålitelig kilde, helt ekte</cite>
+        </div>
+        <div class="testimonial">
+          <p>Nettsiden de lagde falt ikke ned en eneste gang. I hvert fall ikke mens jeg så på.</p>
+          <cite>— Fornøyd jubilar, 2024</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="slant-up"></div>
+
+  <section class="cream-section">
+    <div class="cream-section-inner">
+      <div class="section-label" style="color:var(--red);">§ Eksklusivt tilbud</div>
+      <h2 class="section-title" style="font-size:2.5rem; color:var(--dark); margin-bottom:1.5rem;">
+        Trippel garanti<br/><span style="color:var(--red);">eller pengene tilbake*</span>
+      </h2>
+      <div class="guarantee-box">
+        <div class="guarantee-seal">Pengene<br/>tilbake*<br/>garanti</div>
+        <div class="guarantee-text">
+          <h3>Jeg lover å gjøre mitt beste</h3>
+          <p>Og når mitt beste ikke er nok — spør jeg AI. Det er faktisk ganske effektivt. Jubileet ditt er i trygge hender. Omtrent.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <div class="cta-inner">
+      <h2>Hyr meg<br/>allerede!!</h2>
+      <p>
+        Jubileet fortjener en nettside. Jeg fortjener en sjanse.<br/>
+        Tilbudet gjelder til stillingen er fylt — eller til jeg ombestemmer meg.
+      </p>
+      <button class="cta-big-btn" onclick="document.getElementById('modal').classList.add('open')">
+        ★ JA, JEG VIL HA DEG! ★
+      </button>
+      <p class="fine-print">
+        *Pengene tilbake-garanti gjelder kun om du ikke betalte noe. Ingen lønn krevd – kun en plass i komiteen.
+        Resultater garantert innen rimelig tid. Hva som er «rimelig» defineres av undertegnede.
+        Tilbudet kan trekkes tilbake uten varsel. Laget med kjærlighet, 4 feilmeldinger og én god prompt.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    © 2025 · Vibe Coder Enterprises · «Vi koder. Noen ganger.»<br/>
+    Alle rettigheter forbeholdt. Nettside laget ved hjelp av AI, kaffe og ren vilje.<br/>
+    Ikke ansvarlig for eventuelle feil, bugs, eller eksistensiell krise forårsaket av denne nettsiden.
+  </footer>
+
+  <div class="modal-overlay" id="modal" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="modal-box">
+      <h3>🎉 Utmerket valg! 🎉</h3>
+      <p>
+        Du vil ikke angre på dette.<br/>
+        (Sannsynligvis.)<br/><br/>
+        Søknaden er herved offisielt innlevert. Jubileet er reddet.
+      </p>
+      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">
+        Lukk &amp; feir!
+      </button>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div>
-      <div class="footer-name">William <span>Boland</span></div>
-      <div class="footer-note">Web Developer · Open to opportunities</div>
-    </div>
-    <a href="mailto:william@example.com" class="footer-cta">Get in touch →</a>
-  </footer>
-
   <script>
-    // Custom cursor
-    const cursor = document.getElementById('cursor');
-    document.addEventListener('mousemove', e => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-    });
-    document.querySelectorAll('a, .tag, .footer-cta').forEach(el => {
-      el.addEventListener('mouseenter', () => cursor.classList.add('expand'));
-      el.addEventListener('mouseleave', () => cursor.classList.remove('expand'));
-    });
-
-    // Scroll-triggered fade for about section
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.opacity = '1';
-          e.target.style.transform = 'translateY(0)';
-        }
-      });
-    }, { threshold: 0.15 });
-
-    document.querySelectorAll('.about-content > *').forEach((el, i) => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(30px)';
-      el.style.transition = `opacity 0.7s ease ${i * 0.12}s, transform 0.7s ease ${i * 0.12}s`;
-      observer.observe(el);
-    });
+    function loadImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.getElementById('profileImg');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('placeholder').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
   </script>
 </body>
 </html>
