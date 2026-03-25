@@ -252,7 +252,19 @@ function makeBird() {
   return { x: 100, y: H / 2 - 30, vy: 0, angle: 0, flap: 0 };
 }
 
-// ── Draw bird ──
+const mateImg = new Image();
+mateImg.src = 'image.jpg'; // match your filename exactly
+
+function drawBird(b) {
+  ctx.save();
+  ctx.translate(b.x, b.y);
+  const tilt = Math.max(-30, Math.min(70, b.angle));
+  ctx.rotate((tilt * Math.PI) / 180);
+  ctx.drawImage(mateImg, -20, -20, 40, 40); // adjust size here
+  ctx.restore();
+}
+
+/* // ── Draw bird ──
 function drawBird(b) {
   ctx.save();
   ctx.translate(b.x, b.y);
@@ -298,7 +310,7 @@ function drawBird(b) {
 
   ctx.restore();
 }
-
+ */
 // ── Pipe ──
 function makePipe(x) {
   const minTop = 80;
