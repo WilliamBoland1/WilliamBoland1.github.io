@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>William's World</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d0d0d;--paper:#f5f0e8;--accent:#e84c2b;--accent2:#f5c842;
+  --been:#f5c842;--wish:#e84c2b;--done:#4caf50;
+  --panel:rgba(13,13,13,0.92);--mid:#888;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#060612;font-family:'DM Sans',sans-serif;color:white}
+canvas{display:block;cursor:grab}
+canvas.grabbing{cursor:grabbing}
+
+/* Layout */
+#app{width:100vw;height:100vh;position:relative}
+
+/* Sidebar */
+#sidebar{
+  position:absolute;top:0;left:0;height:100%;width:300px;
+  background:var(--panel);border-right:1px solid rgba(255,255,255,0.08);
+  display:flex;flex-direction:column;z-index:10;
+  transform:translateX(0);transition:transform 0.3s ease;
+}
+#sidebar.hidden{transform:translateX(-300px)}
+
+#sidebar-header{
+  padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent2);letter-spacing:0.04em;line-height:1}
+.logo span{color:var(--accent)}
+.tagline{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--mid);margin-top:0.2rem}
+
+/* Search */
+#search-wrap{padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+#search-input{
+  width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+  color:white;padding:0.6rem 1rem;font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  outline:none;transition:border 0.2s;
+}
+#search-input::placeholder{color:rgba(255,255,255,0.3)}
+#search-input:focus{border-color:var(--accent2)}
+#search-results{
+  background:rgba(10,10,20,0.98);border:1px solid rgba(255,255,255,0.1);
+  border-top:none;max-height:180px;overflow-y:auto;display:none;
+}
+.search-result{
+  padding:0.6rem 1rem;font-size:0.8rem;color:rgba(255,255,255,0.7);
+  cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.15s;
+}
+.search-result:hover{background:rgba(255,255,255,0.08);color:white}
+
+/* Add pin controls */
+#add-wrap{padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+.add-label{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--mid);margin-bottom:0.6rem}
+.type-btns{display:flex;gap:0.5rem}
+.type-btn{
+  flex:1;padding:0.5rem;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;
+  font-family:'DM Sans',sans-serif;font-weight:500;border:1.5px solid;cursor:pointer;
+  background:transparent;transition:all 0.2s;
+}
+.type-btn[data-type="been"]{border-color:var(--been);color:var(--been)}
+.type-btn[data-type="wish"]{border-color:var(--wish);color:var(--wish)}
+.type-btn.active[data-type="been"]{background:var(--been);color:#0d0d0d}
+.type-btn.active[data-type="wish"]{background:var(--wish);color:white}
+
+/* Stats */
+#stats{padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;display:flex;gap:1.5rem}
+.stat{text-align:center}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1}
+.stat-n.been{color:var(--been)}
+.stat-n.wish{color:var(--wish)}
+.stat-n.done{color:var(--done)}
+.stat-l{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid)}
+
+/* Pin list */
+#pin-list{flex:1;overflow-y:auto;padding:0.5rem 0}
+#pin-list::-webkit-scrollbar{width:4px}
+#pin-list::-webkit-scrollbar-track{background:transparent}
+#pin-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
+.pin-item{
+  padding:0.65rem 1.5rem;display:flex;align-items:center;gap:0.75rem;
+  border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.15s;
+}
+.pin-item:hover{background:rgba(255,255,255,0.05)}
+.pin-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pin-dot.been{background:var(--been)}
+.pin-dot.wish{background:var(--wish)}
+.pin-dot.done{background:var(--done)}
+.pin-name{font-size:0.82rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pin-check{
+  font-size:0.7rem;padding:0.2rem 0.5rem;border:1px solid;cursor:pointer;
+  transition:all 0.15s;background:transparent;color:var(--done);border-color:var(--done);
+  font-family:'DM Sans',sans-serif;white-space:nowrap;
+}
+.pin-check:hover{background:var(--done);color:#0d0d0d}
+.pin-del{
+  font-size:0.7rem;padding:0.2rem 0.4rem;border:1px solid rgba(255,255,255,0.15);
+  cursor:pointer;background:transparent;color:rgba(255,255,255,0.3);
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+}
+.pin-del:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Toggle sidebar btn */
+#toggle-btn{
+  position:absolute;top:1.2rem;left:310px;z-index:20;
+  background:var(--panel);border:1px solid rgba(255,255,255,0.1);
+  color:white;width:36px;height:36px;cursor:pointer;font-size:1rem;
+  transition:left 0.3s ease,background 0.2s;display:flex;align-items:center;justify-content:center;
+}
+#toggle-btn:hover{background:rgba(255,255,255,0.1)}
+#toggle-btn.sidebar-hidden{left:10px}
+
+/* Tooltip */
+#tooltip{
+  position:absolute;background:var(--panel);border:1px solid rgba(255,255,255,0.12);
+  padding:0.5rem 0.9rem;font-size:0.78rem;pointer-events:none;
+  white-space:nowrap;display:none;z-index:30;
+  box-shadow:4px 4px 0 rgba(245,200,66,0.2);
+}
+
+/* Add pin modal */
+#modal{
+  position:absolute;inset:0;background:rgba(0,0,0,0.6);z-index:40;
+  display:none;align-items:center;justify-content:center;
+}
+#modal.show{display:flex}
+#modal-box{
+  background:#0d0d1e;border:1px solid rgba(255,255,255,0.12);
+  padding:2rem;width:320px;box-shadow:6px 6px 0 var(--accent);
+}
+#modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent2);margin-bottom:1rem}
+#modal-name{
+  width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+  color:white;padding:0.65rem 1rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;
+  outline:none;margin-bottom:1rem;
+}
+#modal-name:focus{border-color:var(--accent2)}
+.modal-btns{display:flex;gap:0.5rem}
+.modal-btn{
+  flex:1;padding:0.7rem;font-family:'DM Sans',sans-serif;font-size:0.8rem;
+  font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;
+  border:none;transition:all 0.15s;
+}
+#modal-confirm{background:var(--accent);color:white}
+#modal-confirm:hover{background:#c43a20}
+#modal-cancel{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)}
+#modal-cancel:hover{background:rgba(255,255,255,0.15)}
+
+/* Hint */
+#hint{
+  position:absolute;bottom:1.5rem;right:1.5rem;
+  font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:rgba(255,255,255,0.2);text-align:right;line-height:1.8;pointer-events:none;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="globe"></canvas>
+
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div class="logo">William's <span>World</span></div>
+      <div class="tagline">Travel Bucket List</div>
+    </div>
+
+    <div id="search-wrap">
+      <input id="search-input" type="text" placeholder="Search for a place..."/>
+      <div id="search-results"></div>
+    </div>
+
+    <div id="add-wrap">
+      <div class="add-label">Pin type when clicking globe</div>
+      <div class="type-btns">
+        <button class="type-btn active" data-type="been">Been There</button>
+        <button class="type-btn" data-type="wish">Wish List</button>
+      </div>
+    </div>
+
+    <div id="stats">
+      <div class="stat"><div class="stat-n been" id="stat-been">0</div><div class="stat-l">Visited</div></div>
+      <div class="stat"><div class="stat-n wish" id="stat-wish">0</div><div class="stat-l">Wish List</div></div>
+      <div class="stat"><div class="stat-n done" id="stat-done">0</div><div class="stat-l">Checked Off</div></div>
+    </div>
+
+    <div id="pin-list"></div>
+  </div>
+
+  <button id="toggle-btn" title="Toggle sidebar">☰</button>
+  <div id="tooltip"></div>
+
+  <div id="modal">
+    <div id="modal-box">
+      <div id="modal-title">Add Pin</div>
+      <input id="modal-name" type="text" placeholder="Place name (e.g. Tokyo, Japan)"/>
+      <div class="modal-btns">
+        <button class="modal-btn" id="modal-confirm">Add Pin</button>
+        <button class="modal-btn" id="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="hint">Drag to rotate &nbsp;·&nbsp; Scroll to zoom<br>Click globe to drop pin</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── State ──
+let pins = JSON.parse(localStorage.getItem('wb_pins') || '[]');
+let activePinType = 'been';
+let pendingPin = null;
+let sidebarVisible = true;
+
+// ── Three.js setup ──
+const canvas = document.getElementById('globe');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+camera.position.z = 2.8;
+
+// Globe
+const geo = new THREE.SphereGeometry(1, 64, 64);
+
+// Earth texture via canvas
+function makeEarthTexture() {
+  const size = 1024;
+  const tc = document.createElement('canvas');
+  tc.width = size; tc.height = size/2;
+  const tx = tc.getContext('2d');
+
+  // Ocean
+  tx.fillStyle = '#0a1628';
+  tx.fillRect(0,0,size,size/2);
+
+  // Rough continents (simplified polygons mapped to equirectangular)
+  tx.fillStyle = '#1a3a1a';
+
+  // North America
+  tx.beginPath();
+  tx.moveTo(120,80); tx.lineTo(200,70); tx.lineTo(230,100);
+  tx.lineTo(250,130); tx.lineTo(230,180); tx.lineTo(200,200);
+  tx.lineTo(170,210); tx.lineTo(150,190); tx.lineTo(130,160);
+  tx.lineTo(110,130); tx.closePath(); tx.fill();
+
+  // South America
+  tx.beginPath();
+  tx.moveTo(190,220); tx.lineTo(230,215); tx.lineTo(250,240);
+  tx.lineTo(245,290); tx.lineTo(220,330); tx.lineTo(195,340);
+  tx.lineTo(178,310); tx.lineTo(175,270); tx.closePath(); tx.fill();
+
+  // Europe
+  tx.beginPath();
+  tx.moveTo(440,70); tx.lineTo(490,65); tx.lineTo(510,80);
+  tx.lineTo(505,110); tx.lineTo(480,120); tx.lineTo(455,115);
+  tx.lineTo(440,100); tx.closePath(); tx.fill();
+
+  // Africa
+  tx.beginPath();
+  tx.moveTo(450,125); tx.lineTo(510,120); tx.lineTo(540,150);
+  tx.lineTo(545,200); tx.lineTo(530,260); tx.lineTo(500,290);
+  tx.lineTo(470,280); tx.lineTo(450,240); tx.lineTo(445,180);
+  tx.closePath(); tx.fill();
+
+  // Asia
+  tx.beginPath();
+  tx.moveTo(510,60); tx.lineTo(700,55); tx.lineTo(760,80);
+  tx.lineTo(780,110); tx.lineTo(760,140); tx.lineTo(720,150);
+  tx.lineTo(680,145); tx.lineTo(640,160); tx.lineTo(610,155);
+  tx.lineTo(560,140); tx.lineTo(530,120); tx.lineTo(510,95);
+  tx.closePath(); tx.fill();
+
+  // India
+  tx.beginPath();
+  tx.moveTo(610,145); tx.lineTo(650,145); tx.lineTo(660,175);
+  tx.lineTo(635,200); tx.lineTo(615,185); tx.closePath(); tx.fill();
+
+  // Southeast Asia
+  tx.beginPath();
+  tx.moveTo(700,150); tx.lineTo(760,145); tx.lineTo(780,165);
+  tx.lineTo(760,185); tx.lineTo(720,180); tx.closePath(); tx.fill();
+
+  // Australia
+  tx.beginPath();
+  tx.moveTo(720,250); tx.lineTo(800,245); tx.lineTo(830,265);
+  tx.lineTo(840,300); tx.lineTo(810,320); tx.lineTo(760,315);
+  tx.lineTo(725,295); tx.closePath(); tx.fill();
+
+  // Greenland
+  tx.beginPath();
+  tx.moveTo(290,40); tx.lineTo(350,35); tx.lineTo(370,55);
+  tx.lineTo(355,80); tx.lineTo(310,85); tx.lineTo(285,65);
+  tx.closePath(); tx.fill();
+
+  // Add some terrain detail
+  tx.fillStyle = '#224422';
+  tx.fillRect(120,80,10,10);
+  tx.fillRect(460,130,8,8);
+  tx.fillRect(530,65,8,8);
+
+  // Grid lines (lat/lon)
+  tx.strokeStyle = 'rgba(255,255,255,0.04)';
+  tx.lineWidth = 1;
+  for(let i=0;i<size;i+=size/12){
+    tx.beginPath(); tx.moveTo(i,0); tx.lineTo(i,size/2); tx.stroke();
+  }
+  for(let i=0;i<size/2;i+=size/12){
+    tx.beginPath(); tx.moveTo(0,i); tx.lineTo(size,i); tx.stroke();
+  }
+
+  return new THREE.CanvasTexture(tc);
+}
+
+const mat = new THREE.MeshPhongMaterial({
+  map: makeEarthTexture(),
+  specular: new THREE.Color(0x112244),
+  shininess: 15,
+  emissive: new THREE.Color(0x050a12),
+  emissiveIntensity: 0.3,
+});
+const globe = new THREE.Mesh(geo, mat);
+scene.add(globe);
+
+// Atmosphere glow
+const atmGeo = new THREE.SphereGeometry(1.04, 64, 64);
+const atmMat = new THREE.MeshPhongMaterial({
+  color: 0x1a4a8a,
+  transparent: true,
+  opacity: 0.12,
+  side: THREE.FrontSide,
+});
+scene.add(new THREE.Mesh(atmGeo, atmMat));
+
+// Lights
+const ambient = new THREE.AmbientLight(0x334466, 0.8);
+scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(5, 3, 5);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0x223366, 0.3);
+fill.position.set(-5,-2,-3);
+scene.add(fill);
+
+// Stars background
+const starGeo = new THREE.BufferGeometry();
+const starVerts = [];
+for(let i=0;i<3000;i++){
+  starVerts.push((Math.random()-0.5)*400,(Math.random()-0.5)*400,(Math.random()-0.5)*400);
+}
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVerts,3));
+const starMat = new THREE.PointsMaterial({color:0xffffff,size:0.4,sizeAttenuation:true});
+scene.add(new THREE.Points(starGeo, starMat));
+
+// Pin sprites
+const pinGroup = new THREE.Group();
+scene.add(pinGroup);
+
+function pinColor(type) {
+  if(type==='been') return '#f5c842';
+  if(type==='wish') return '#e84c2b';
+  if(type==='done') return '#4caf50';
+  return '#ffffff';
+}
+
+function latLonToVec3(lat, lon, r=1.015) {
+  const phi = (90-lat)*Math.PI/180;
+  const theta = (lon+180)*Math.PI/180;
+  return new THREE.Vector3(
+    -r*Math.sin(phi)*Math.cos(theta),
+     r*Math.cos(phi),
+     r*Math.sin(phi)*Math.sin(theta)
+  );
+}
+
+function makeSprite(type) {
+  const sc = document.createElement('canvas');
+  sc.width=64; sc.height=64;
+  const sx = sc.getContext('2d');
+  const col = pinColor(type);
+  // Outer ring
+  sx.strokeStyle = col;
+  sx.lineWidth = 3;
+  sx.beginPath(); sx.arc(32,32,18,0,Math.PI*2); sx.stroke();
+  // Inner dot
+  sx.fillStyle = col;
+  sx.beginPath(); sx.arc(32,32,8,0,Math.PI*2); sx.fill();
+  // Pulse ring
+  sx.strokeStyle = col;
+  sx.globalAlpha = 0.3;
+  sx.lineWidth = 1.5;
+  sx.beginPath(); sx.arc(32,32,26,0,Math.PI*2); sx.stroke();
+  return new THREE.SpriteMaterial({map:new THREE.CanvasTexture(sc),depthTest:false});
+}
+
+function addPinMesh(pin) {
+  const mat = makeSprite(pin.type);
+  const sprite = new THREE.Sprite(mat);
+  const pos = latLonToVec3(pin.lat, pin.lon);
+  sprite.position.copy(pos);
+  sprite.scale.set(0.12,0.12,0.12);
+  sprite.userData = {pinId: pin.id};
+  pinGroup.add(sprite);
+}
+
+function rebuildPins() {
+  while(pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
+  pins.forEach(addPinMesh);
+}
+
+// ── Resize ──
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── Orbit controls (manual) ──
+let isDragging=false, prevMouse={x:0,y:0};
+let rotX=0.3, rotY=0;
+let zoomDist=2.8;
+const MIN_ZOOM=1.6, MAX_ZOOM=5;
+
+canvas.addEventListener('mousedown', e=>{
+  isDragging=true;
+  prevMouse={x:e.clientX,y:e.clientY};
+  canvas.classList.add('grabbing');
+});
+window.addEventListener('mouseup', ()=>{isDragging=false;canvas.classList.remove('grabbing')});
+window.addEventListener('mousemove', e=>{
+  if(!isDragging) return;
+  const dx=e.clientX-prevMouse.x, dy=e.clientY-prevMouse.y;
+  rotY+=dx*0.005; rotX+=dy*0.005;
+  rotX=Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, rotX));
+  prevMouse={x:e.clientX,y:e.clientY};
+});
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  zoomDist=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,zoomDist+e.deltaY*0.005));
+},{passive:false});
+
+// Touch
+let lastTouch=null, touchDist=null;
+canvas.addEventListener('touchstart', e=>{
+  if(e.touches.length===1){isDragging=true;lastTouch={x:e.touches[0].clientX,y:e.touches[0].clientY}}
+  else if(e.touches.length===2){
+    const dx=e.touches[0].clientX-e.touches[1].clientX;
+    const dy=e.touches[0].clientY-e.touches[1].clientY;
+    touchDist=Math.sqrt(dx*dx+dy*dy);
+  }
+},{passive:true});
+canvas.addEventListener('touchmove', e=>{
+  if(e.touches.length===1&&lastTouch){
+    const dx=e.touches[0].clientX-lastTouch.x, dy=e.touches[0].clientY-lastTouch.y;
+    rotY+=dx*0.005; rotX+=dy*0.005;
+    rotX=Math.max(-Math.PI/2.2,Math.min(Math.PI/2.2,rotX));
+    lastTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  } else if(e.touches.length===2&&touchDist){
+    const dx=e.touches[0].clientX-e.touches[1].clientX;
+    const dy=e.touches[0].clientY-e.touches[1].clientY;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    zoomDist=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,zoomDist-(d-touchDist)*0.01));
+    touchDist=d;
+  }
+},{passive:true});
+canvas.addEventListener('touchend',()=>{isDragging=false;lastTouch=null;touchDist=null});
+
+// ── Click to place pin ──
+const raycaster = new THREE.Raycaster();
+const mouse2D = new THREE.Vector2();
+let mouseDownPos = {x:0,y:0};
+
+canvas.addEventListener('mousedown', e=>{mouseDownPos={x:e.clientX,y:e.clientY}});
+canvas.addEventListener('click', e=>{
+  const dx=Math.abs(e.clientX-mouseDownPos.x), dy=Math.abs(e.clientY-mouseDownPos.y);
+  if(dx>5||dy>5) return; // was a drag
+
+  mouse2D.x=(e.clientX/window.innerWidth)*2-1;
+  mouse2D.y=-(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(mouse2D, camera);
+
+  // Check pin sprites first
+  const spriteHits = raycaster.intersectObjects(pinGroup.children);
+  if(spriteHits.length>0){
+    const pid = spriteHits[0].object.userData.pinId;
+    const pin = pins.find(p=>p.id===pid);
+    if(pin) showTooltipForPin(pin, e.clientX, e.clientY);
+    return;
+  }
+
+  const hits = raycaster.intersectObject(globe);
+  if(hits.length===0) return;
+
+  const pt = hits[0].point.normalize();
+  const lat = 90-Math.acos(pt.y)*180/Math.PI;
+  const lon = Math.atan2(pt.z, -pt.x)*180/Math.PI - 180;
+  const normLon = ((lon%360)+540)%360-180;
+
+  pendingPin = {lat, lon:normLon};
+  openModal();
+});
+
+// ── Tooltip ──
+const tooltip = document.getElementById('tooltip');
+function showTooltipForPin(pin, x, y) {
+  tooltip.textContent = pin.name + (pin.type==='done'?' ✓':'');
+  tooltip.style.left = (x+12)+'px';
+  tooltip.style.top = (y-10)+'px';
+  tooltip.style.display = 'block';
+  setTimeout(()=>tooltip.style.display='none', 2000);
+}
+
+// ── Modal ──
+const modal = document.getElementById('modal');
+const modalName = document.getElementById('modal-name');
+
+function openModal() {
+  modalName.value='';
+  document.getElementById('modal-title').textContent = activePinType==='been' ? 'Been There' : 'Wish List';
+  modal.classList.add('show');
+  setTimeout(()=>modalName.focus(),100);
+}
+
+document.getElementById('modal-confirm').addEventListener('click', confirmPin);
+document.getElementById('modal-cancel').addEventListener('click', ()=>{modal.classList.remove('show');pendingPin=null});
+modalName.addEventListener('keydown', e=>{ if(e.key==='Enter') confirmPin(); if(e.key==='Escape'){modal.classList.remove('show');pendingPin=null}});
+
+function confirmPin() {
+  if(!pendingPin) return;
+  const name = modalName.value.trim() || `${pendingPin.lat.toFixed(1)}°, ${pendingPin.lon.toFixed(1)}°`;
+  const pin = {id:Date.now(), name, lat:pendingPin.lat, lon:pendingPin.lon, type:activePinType};
+  pins.push(pin);
+  save();
+  rebuildPins();
+  renderList();
+  updateStats();
+  modal.classList.remove('show');
+  pendingPin=null;
+}
+
+// ── Search (OpenStreetMap Nominatim) ──
+const searchInput = document.getElementById('search-input');
+const searchResults = document.getElementById('search-results');
+let searchTimer;
+
+searchInput.addEventListener('input', ()=>{
+  clearTimeout(searchTimer);
+  const q = searchInput.value.trim();
+  if(q.length<2){searchResults.style.display='none';return}
+  searchTimer = setTimeout(()=>doSearch(q), 400);
+});
+
+async function doSearch(q) {
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6`);
+    const data = await r.json();
+    searchResults.innerHTML='';
+    if(!data.length){searchResults.style.display='none';return}
+    data.forEach(item=>{
+      const d = document.createElement('div');
+      d.className='search-result';
+      d.textContent=item.display_name.split(',').slice(0,3).join(', ');
+      d.addEventListener('click',()=>{
+        pendingPin={lat:parseFloat(item.lat), lon:parseFloat(item.lon)};
+        modalName.value=item.display_name.split(',')[0];
+        searchResults.style.display='none';
+        searchInput.value='';
+        // Fly to location
+        const phi=(90-pendingPin.lat)*Math.PI/180;
+        const theta=(pendingPin.lon+180)*Math.PI/180;
+        rotY = -theta + Math.PI;
+        rotX = pendingPin.lat*Math.PI/180*0.8;
+        openModal();
+      });
+      searchResults.appendChild(d);
+    });
+    searchResults.style.display='block';
+  } catch(e){ searchResults.style.display='none'; }
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#search-wrap')) searchResults.style.display='none';
+});
+
+// ── Pin type selector ──
+document.querySelectorAll('.type-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activePinType=btn.dataset.type;
+  });
+});
+
+// ── Pin list ──
+function renderList() {
+  const list = document.getElementById('pin-list');
+  list.innerHTML='';
+  if(!pins.length){
+    list.innerHTML='<div style="padding:1.5rem;font-size:0.78rem;color:rgba(255,255,255,0.2);text-align:center">No pins yet.<br>Click the globe to start!</div>';
+    return;
+  }
+  [...pins].reverse().forEach(pin=>{
+    const item=document.createElement('div');
+    item.className='pin-item';
+    item.innerHTML=`
+      <div class="pin-dot ${pin.type}"></div>
+      <div class="pin-name">${pin.name}</div>
+      ${pin.type==='wish'?`<button class="pin-check" data-id="${pin.id}">✓ Done</button>`:''}
+      <button class="pin-del" data-id="${pin.id}">✕</button>
+    `;
+    item.addEventListener('click', e=>{
+      if(e.target.classList.contains('pin-del')){
+        pins=pins.filter(p=>p.id!==parseInt(e.target.dataset.id));
+        save(); rebuildPins(); renderList(); updateStats(); return;
+      }
+      if(e.target.classList.contains('pin-check')){
+        const p=pins.find(p=>p.id===parseInt(e.target.dataset.id));
+        if(p){p.type='done'; save(); rebuildPins(); renderList(); updateStats();} return;
+      }
+      // Fly to pin
+      const p=pins.find(p=>p.id===pin.id);
+      if(p){
+        const theta=(p.lon+180)*Math.PI/180;
+        rotY = -theta + Math.PI;
+        rotX = p.lat*Math.PI/180*0.8;
+        zoomDist=2.0;
+      }
+    });
+    list.appendChild(item);
+  });
+}
+
+function updateStats() {
+  document.getElementById('stat-been').textContent=pins.filter(p=>p.type==='been').length;
+  document.getElementById('stat-wish').textContent=pins.filter(p=>p.type==='wish').length;
+  document.getElementById('stat-done').textContent=pins.filter(p=>p.type==='done').length;
+}
+
+function save() { localStorage.setItem('wb_pins', JSON.stringify(pins)); }
+
+// ── Sidebar toggle ──
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggle-btn');
+toggleBtn.addEventListener('click',()=>{
+  sidebarVisible=!sidebarVisible;
+  sidebar.classList.toggle('hidden',!sidebarVisible);
+  toggleBtn.classList.toggle('sidebar-hidden',!sidebarVisible);
+  toggleBtn.textContent = sidebarVisible ? '☰' : '☰';
+  resize();
+});
+
+// ── Auto-rotate ──
+let autoRotate=true;
+canvas.addEventListener('mousedown',()=>autoRotate=false);
+canvas.addEventListener('touchstart',()=>autoRotate=false,{passive:true});
+
+// ── Animate ──
+function animate() {
+  requestAnimationFrame(animate);
+  if(autoRotate) rotY += 0.002;
+  camera.position.x = zoomDist*Math.sin(rotY)*Math.cos(rotX);
+  camera.position.y = zoomDist*Math.sin(rotX);
+  camera.position.z = zoomDist*Math.cos(rotY)*Math.cos(rotX);
+  camera.lookAt(0,0,0);
+  renderer.render(scene, camera);
+}
+
+// ── Init ──
+rebuildPins();
+renderList();
+updateStats();
+animate();
+</script>
+</body>
+</html>
