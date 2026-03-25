@@ -186,6 +186,7 @@ onValue(query(scoresRef, orderByChild('score')), snap => {
   snap.forEach(c => rows.push(c.val()));
   // Sort descending by score
   rows.sort((a, b) => b.score - a.score);
+  renderLB(rows); 
 });
 
 
