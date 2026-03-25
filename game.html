@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Floppy Test — Sjekke ut om d funker</title>
+  <title>Flakse Fugl</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,6 +68,8 @@
       font-size: 0.9rem; text-align: center; outline: none; margin-bottom: 1rem;
     }
     .name-input:focus { border-color: var(--accent2); }
+    .name-input.shake { animation: shake 0.35s ease; border-color: var(--accent); }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
     .name-input::placeholder { color: rgba(255,255,255,0.25); }
     .tip { font-size: 0.65rem; color: rgba(255,255,255,0.25); letter-spacing: 0.1em; margin-top: 0.6rem; }
     #saving-msg { font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 0.5rem; min-height: 1.2em; }
@@ -99,7 +101,7 @@
 
     @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
     @media (max-width: 640px) {
-      #leaderboard { width: 360px; max-width: 98vw; max-height: 180px; }
+      #leaderboard { width: 360px; max-width: 98vw; max-height: 280px; }
     }
   </style>
 </head>
@@ -112,7 +114,7 @@
 
       <div class="screen" id="start-screen">
         <div style="font-size:2.8rem;margin-bottom:0.4rem;animation:bob 1s ease-in-out infinite">🐦</div>
-        <div class="screen-title">Floppy<br>Test</div>
+        <div class="screen-title">Flakse<br>Fugl</div>
         <div class="screen-sub">Global Leaderboard Edition</div>
         <input class="name-input" id="player-name" type="text" maxlength="16" placeholder="Your name…"/>
         <button class="btn" id="start-btn">Play</button>
@@ -181,73 +183,32 @@ async function submitScore(name, score) {
 
 const scoresRef = ref(db, 'scores');
 onValue(query(scoresRef, orderByChild('score')), snap => {
-  console.log("🔥 Firebase snapshot received");
-
   const rows = [];
-
-  snap.forEach((child, index) => {
-    const val = child.val();
-
-    console.log(`📦 Entry ${index}:`, {
-      key: child.key,
-      data: val
-    });
-
-    rows.push(val);
-  });
-
-  console.log("📊 Raw rows array:", rows);
-
-  // Sort descending
+  snap.forEach(child => rows.push(child.val()));
   rows.sort((a, b) => b.score - a.score);
-
-  const top10 = rows.slice(0, 10);
-
-  console.log("🏆 Sorted rows after slice:", rows);
-
-  renderLB(top10);
-
-  
+  renderLB(rows.slice(0, 10));
 });
 
 
 
 function renderLB(rows) {
-  console.log("🎨 Rendering leaderboard...");
-  console.log("📊 Rows received in renderLB:", rows);
-
   const myName = document.getElementById('player-name').value.trim().toLowerCase();
-  console.log("👤 Current player:", myName);
-
   const list = document.getElementById('lb-list');
 
   if (!rows.length) {
-    console.log("⚠️ No rows to display");
     list.innerHTML = '<div class="lb-empty">No scores yet —<br>be the first!</div>';
     return;
   }
 
-  const html = rows.map((r, i) => {
+  list.innerHTML = rows.map((r, i) => {
     const rc = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     const me = myName && r.name.toLowerCase() === myName;
-
-    console.log(`🔹 Row ${i}:`, {
-      name: r.name,
-      score: r.score,
-      rank: i + 1,
-      isMe: me
-    });
-
     return `<div class="lb-row${me ? ' me' : ''}">
       <div class="lb-rank ${rc}">${i + 1}</div>
       <div class="lb-name${me ? ' me-name' : ''}">${esc(r.name)}</div>
       <div class="lb-score">${r.score}</div>
     </div>`;
   }).join('');
-
-  console.log("🧱 Final HTML output:", html);
-
-  list.innerHTML = html;
 }
 
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -346,7 +307,15 @@ function showScreen(id){
 
 function flap(){
   if(state==='idle'){
-    playerName=document.getElementById('player-name').value.trim()||'Anonymous';
+    const nameEl=document.getElementById('player-name');
+    if(!nameEl.value.trim()){
+      nameEl.classList.remove('shake');
+      void nameEl.offsetWidth;
+      nameEl.classList.add('shake');
+      nameEl.focus();
+      return;
+    }
+    playerName=nameEl.value.trim();
     state='playing'; bird.vy=JP; bird.flap=8; showScreen(null); return;
   }
   if(state==='playing'){ bird.vy=JP; bird.flap=8; }
