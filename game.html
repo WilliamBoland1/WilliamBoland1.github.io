@@ -179,6 +179,7 @@ async function submitScore(name, score) {
   return false; // not a new best
 }
 
+const scoresRef = ref(db, 'scores');
 onValue(query(scoresRef, orderByChild('score')), snap => {
   console.log("🔥 Firebase snapshot received");
 
