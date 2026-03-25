@@ -292,7 +292,7 @@ function makePipe(x){ return {x, topH:Math.random()*(H-GH-GAP-120)+70, scored:fa
 
 function drawPipe(p){
   const cH=22,cap=6,bY=p.topH+GAP,bH=H-GH-bY;
-  ctx.fillStyle='#1e4a1e'; ctx.fillRect(p.x+4,p.topH+2,PW,bH-2); ctx.fillRect(p.x+4,2,PW,p.topH-2);
+  ctx.fillStyle='#1e4a1e'; ctx.fillRect(p.x+4,2,PW,p.topH-2);
   ctx.fillStyle='#2d6a2d'; ctx.fillRect(p.x,0,PW,p.topH-cH);
   ctx.fillStyle='#3d8a3d'; ctx.fillRect(p.x-cap,p.topH-cH,PW+cap*2,cH);
   ctx.fillStyle='#4caf50'; ctx.fillRect(p.x+4,0,8,p.topH-cH); ctx.fillRect(p.x+4,p.topH-cH,8,cH);
