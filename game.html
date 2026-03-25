@@ -264,15 +264,27 @@ let bird, pipes, stars, lastPipe, lastTime, playerName='';
 function makeStars(){ stars=[]; for(let i=0;i<80;i++) stars.push({x:Math.random()*W,y:Math.random()*(H-GH),r:Math.random()*1.4+0.3,a:Math.random()*0.6+0.2}); }
 function makeBird(){ return {x:90,y:H/2-30,vy:0,angle:0,flap:0}; }
 
-function drawBird(b){
-  ctx.save(); ctx.translate(b.x,b.y);
-  ctx.rotate(Math.max(-30,Math.min(70,b.angle))*Math.PI/180);
-  ctx.fillStyle='#f5c842'; ctx.beginPath(); ctx.ellipse(0,0,18,14,0,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#e8a820'; ctx.beginPath(); ctx.ellipse(-4,b.flap>5?-10:4,12,7,-0.3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(10,-5,5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(11,-5,3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(12,-6,1.2,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#e84c2b'; ctx.beginPath(); ctx.moveTo(16,-2); ctx.lineTo(24,0); ctx.lineTo(16,4); ctx.closePath(); ctx.fill();
+// function drawBird(b){
+//   ctx.save(); ctx.translate(b.x,b.y);
+//   ctx.rotate(Math.max(-30,Math.min(70,b.angle))*Math.PI/180);
+//   ctx.fillStyle='#f5c842'; ctx.beginPath(); ctx.ellipse(0,0,18,14,0,0,Math.PI*2); ctx.fill();
+//   ctx.fillStyle='#e8a820'; ctx.beginPath(); ctx.ellipse(-4,b.flap>5?-10:4,12,7,-0.3,0,Math.PI*2); ctx.fill();
+//   ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(10,-5,5,0,Math.PI*2); ctx.fill();
+//   ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(11,-5,3,0,Math.PI*2); ctx.fill();
+//   ctx.fillStyle='white'; ctx.beginPath(); ctx.arc(12,-6,1.2,0,Math.PI*2); ctx.fill();
+//   ctx.fillStyle='#e84c2b'; ctx.beginPath(); ctx.moveTo(16,-2); ctx.lineTo(24,0); ctx.lineTo(16,4); ctx.closePath(); ctx.fill();
+//   ctx.restore();
+// }
+
+const mateImg = new Image();
+mateImg.src = 'image.jpg'; // match your filename exactly
+
+function drawBird(b) {
+  ctx.save();
+  ctx.translate(b.x, b.y);
+  const tilt = Math.max(-30, Math.min(70, b.angle));
+  ctx.rotate((tilt * Math.PI) / 180);
+  ctx.drawImage(mateImg, -20, -20, 40, 40); // adjust size here
   ctx.restore();
 }
 
