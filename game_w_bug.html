@@ -7,33 +7,53 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --accent: #e84c2b; --accent2: #f5c842; }
-    html, body {
-      width: 100%; height: 100%; background: #0a0a18;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-family: 'DM Sans', sans-serif; overflow: hidden; user-select: none;
+    :root {
+      --accent: #e84c2b;
+      --accent2: #f5c842;
     }
-    #layout { display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    html, body {
+      width: 100%; height: 100%;
+      background: #0a0a18;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    #layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
     #game-wrap { position: relative; flex-shrink: 0; }
     canvas {
-      display: block; width: 360px; max-width: 98vw;
+      display: block;
+      width: 360px;
+      max-width: 98vw;
       border: 3px solid var(--accent);
       box-shadow: 0 0 0 1px var(--accent2), 8px 8px 0 var(--accent2);
     }
     #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
     #score-display {
-      margin-top: 18px; font-family: 'Bebas Neue', sans-serif;
-      font-size: 4rem; color: white; text-shadow: 3px 3px 0 var(--accent);
+      margin-top: 18px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 4rem; color: white;
+      text-shadow: 3px 3px 0 var(--accent);
       letter-spacing: 0.05em; line-height: 1;
     }
     .screen {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       background: rgba(10,10,20,0.85); padding: 2rem; pointer-events: all;
     }
     .screen.hidden { display: none; }
     .screen-title {
-      font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem,10vw,3.5rem);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem,10vw,3.5rem);
       color: var(--accent2); text-shadow: 3px 3px 0 var(--accent);
       letter-spacing: 0.04em; text-align: center; line-height: 1; margin-bottom: 0.3rem;
     }
@@ -42,11 +62,13 @@
       letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; text-align: center;
     }
     .btn {
-      background: var(--accent); color: white; border: none; padding: 0.75rem 2rem;
+      background: var(--accent); color: white; border: none;
+      padding: 0.75rem 2rem;
       font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
       letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 4px 4px 0 var(--accent2); margin-bottom: 0.6rem; width: 200px; text-align: center;
+      box-shadow: 4px 4px 0 var(--accent2);
+      margin-bottom: 0.6rem; width: 200px; text-align: center;
     }
     .btn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--accent2); }
     .btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--accent2); }
@@ -65,19 +87,21 @@
       width: 200px; background: rgba(255,255,255,0.07);
       border: 1.5px solid rgba(255,255,255,0.2); color: white;
       padding: 0.6rem 1rem; font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem; text-align: center; outline: none; margin-bottom: 1rem;
+      font-size: 0.9rem; text-align: center; outline: none; margin-bottom: 1rem; letter-spacing: 0.05em;
     }
     .name-input:focus { border-color: var(--accent2); }
     .name-input::placeholder { color: rgba(255,255,255,0.25); }
     .tip { font-size: 0.65rem; color: rgba(255,255,255,0.25); letter-spacing: 0.1em; margin-top: 0.6rem; }
-    #saving-msg { font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 0.5rem; min-height: 1.2em; }
+    #saving-msg { font-size: 0.7rem; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-top: 0.5rem; display: none; }
 
     /* Leaderboard */
     #leaderboard {
-      width: 240px; background: rgba(13,13,30,0.95);
+      width: 240px;
+      background: rgba(13,13,30,0.95);
       border: 1px solid rgba(245,200,66,0.25);
       box-shadow: 4px 4px 0 rgba(232,76,43,0.3);
-      flex-shrink: 0; max-height: 520px; display: flex; flex-direction: column;
+      flex-shrink: 0; max-height: 520px;
+      display: flex; flex-direction: column;
     }
     #lb-header { padding: 1rem 1.2rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; }
     #lb-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent2); letter-spacing: 0.05em; line-height: 1; }
@@ -85,7 +109,11 @@
     #lb-list { flex: 1; overflow-y: auto; padding: 0.4rem 0; }
     #lb-list::-webkit-scrollbar { width: 3px; }
     #lb-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-    .lb-row { display: flex; align-items: center; padding: 0.5rem 1.2rem; gap: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .lb-row {
+      display: flex; align-items: center;
+      padding: 0.5rem 1.2rem; gap: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
     .lb-row.me { background: rgba(245,200,66,0.07); }
     .lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.2); width: 20px; text-align: center; flex-shrink: 0; }
     .lb-rank.gold { color: #ffd700; }
@@ -136,7 +164,7 @@
   <div id="leaderboard">
     <div id="lb-header">
       <div id="lb-title">Leaderboard</div>
-      <div id="lb-sub">Best score per player · Top 10</div>
+      <div id="lb-sub">Top 10 · All Time</div>
     </div>
     <div id="lb-list"><div class="lb-empty">Loading…</div></div>
     <div id="lb-footer">floppy-boland · live</div>
@@ -145,9 +173,13 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, set, onValue, query, orderByChild }
+import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+
+//Fully aware that the API key is exposed here, but since this is a client-only app with a public database and no sensitive operations, it's not a security risk.
+//Please dont judge, it's just a fun project to practice Firebase and web game development!
+// ── Firebase ──
 const app = initializeApp({
   apiKey: "AIzaSyAELM2Q4U7HUX0VbTIxrVZ6m-8HkbItzng",
   authDomain: "floppy-boland.firebaseapp.com",
@@ -158,62 +190,44 @@ const app = initializeApp({
   databaseURL: "https://floppy-boland-default-rtdb.europe-west1.firebasedatabase.app"
 });
 const db = getDatabase(app);
-
-// ── Key: one record per player name, only their best score is kept ──
-// Path: scores/<sanitised_name> = { name, score }
-function nameKey(n) {
-  // turn "John Doe!" → "john_doe" — safe Firebase key
-  return n.trim().toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 20);
-}
-
-// Submit: only write if this score beats the stored best for that name
-async function submitScore(name, score) {
-  if (!name || score < 1) return;
-  const key = nameKey(name);
-  const entryRef = ref(db, 'scores/' + key);
-  const snap = await get(entryRef);
-  if (!snap.exists() || score > snap.val().score) {
-    await set(entryRef, { name: name.trim(), score, ts: Date.now() });
-    return true; // new best
-  }
-  return false; // not a new best
-}
-
-// Live leaderboard — listen to entire scores node, sort client-side, show top 10
 const scoresRef = ref(db, 'scores');
-onValue(query(scoresRef, orderByChild('score')), snap => {
+
+// Live leaderboard
+const topQ = query(scoresRef, orderByChild('score'), limitToLast(10));
+onValue(topQ, snap => {
   const rows = [];
   snap.forEach(c => rows.push(c.val()));
-  // Sort descending by score
-  rows.sort((a, b) => b.score - a.score);
-  renderLB(rows.slice(0, 10));
+  rows.sort((a,b) => b.score - a.score);
+  renderLB(rows);
 });
 
 function renderLB(rows) {
-  const myName = document.getElementById('player-name').value.trim().toLowerCase();
+  const myName = (document.getElementById('player-name').value.trim()||'').toLowerCase();
   const list = document.getElementById('lb-list');
-  if (!rows.length) {
-    list.innerHTML = '<div class="lb-empty">No scores yet —<br>be the first!</div>';
-    return;
-  }
-  list.innerHTML = rows.map((r, i) => {
-    const rc = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const me = myName && r.name.toLowerCase() === myName;
-    return `<div class="lb-row${me ? ' me' : ''}">
-      <div class="lb-rank ${rc}">${i + 1}</div>
-      <div class="lb-name${me ? ' me-name' : ''}">${esc(r.name)}</div>
+  if (!rows.length) { list.innerHTML='<div class="lb-empty">No scores yet — be first!</div>'; return; }
+  list.innerHTML = rows.map((r,i) => {
+    const rc = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const me = myName && r.name.toLowerCase()===myName;
+    return `<div class="lb-row${me?' me':''}">
+      <div class="lb-rank ${rc}">${i+1}</div>
+      <div class="lb-name${me?' me-name':''}">${esc(r.name)}</div>
       <div class="lb-score">${r.score}</div>
     </div>`;
   }).join('');
 }
 
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Game ──
+async function submitScore(name, score) {
+  if (!name || score < 1) return;
+  await push(scoresRef, { name, score, ts: Date.now() });
+}
+
+// ── Game engine ──
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
-const GH=55, PW=58, GAP=170, GR=0.44, JP=-8.5, PS=3, PINT=1600;
+const GH = 55, PW = 58, GAP = 170, GR = 0.44, JP = -8.5, PS = 3, PI = 1600;
 
 let state='idle', score=0, best=parseInt(localStorage.getItem('fb_best')||'0');
 let bird, pipes, stars, lastPipe, lastTime, playerName='';
@@ -284,7 +298,7 @@ function reset(){ score=0; bird=makeBird(); pipes=[]; lastPipe=performance.now()
 function showScreen(id){
   ['start-screen','over-screen'].forEach(s=>document.getElementById(s).classList.add('hidden'));
   document.getElementById('score-display').style.display='none';
-  document.getElementById('saving-msg').textContent='';
+  document.getElementById('saving-msg').style.display='none';
   if(id) document.getElementById(id).classList.remove('hidden');
   else document.getElementById('score-display').style.display='block';
 }
@@ -303,32 +317,24 @@ async function gameOver(){
   document.getElementById('final-score').textContent=score;
   document.getElementById('best-score').textContent=best;
   document.getElementById('medal').textContent=medal(score);
-  setTimeout(()=>showScreen('over-screen'), 600);
-
   const msg=document.getElementById('saving-msg');
   if(score>0){
-    msg.style.color='rgba(255,255,255,0.3)'; msg.textContent='Saving…';
+    msg.style.display='block'; msg.style.color='rgba(255,255,255,0.3)'; msg.textContent='Saving score…';
     try {
-      const isNewBest = await submitScore(playerName, score);
-      if(isNewBest){
-        msg.style.color='rgba(100,220,100,0.8)';
-        msg.textContent='New personal best saved! 🎉';
-      } else {
-        msg.style.color='rgba(255,255,255,0.3)';
-        msg.textContent='Score saved (not your best)';
-      }
-    } catch(e){
-      msg.style.color='rgba(255,100,100,0.6)';
-      msg.textContent='Could not save score';
+      await submitScore(playerName, score);
+      msg.textContent='Score saved ✓'; msg.style.color='rgba(100,220,100,0.7)';
+    } catch(e) {
+      msg.textContent='Could not save score'; msg.style.color='rgba(255,100,100,0.6)';
     }
   }
+  setTimeout(()=>showScreen('over-screen'), 600);
 }
 
 function loop(ts){
   if(!lastTime) lastTime=ts; lastTime=ts;
   ctx.clearRect(0,0,W,H); drawBg(ts);
   if(state==='playing'){
-    if(ts-lastPipe>PINT){ pipes.push(makePipe(W+10)); lastPipe=ts; }
+    if(ts-lastPipe>PI){ pipes.push(makePipe(W+10)); lastPipe=ts; }
     for(const p of pipes){
       p.x-=PS;
       if(!p.scored&&p.x+PW<bird.x){ p.scored=true; score++; updScore(score); }
@@ -345,6 +351,7 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 
+// Input
 document.addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();flap();} });
 canvas.addEventListener('pointerdown',e=>{ e.preventDefault(); flap(); });
 document.getElementById('player-name').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('start-btn').click(); });
