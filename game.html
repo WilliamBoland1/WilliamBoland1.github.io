@@ -181,12 +181,21 @@ async function submitScore(name, score) {
 
 // Live leaderboard — listen to entire scores node, sort client-side, show top 10
 const scoresRef = ref(db, 'scores');
-onValue(query(scoresRef, orderByChild('score')), snap => {
+// onValue(query(scoresRef, orderByChild('score')), snap => {
+//   const rows = [];
+//   snap.forEach(c => rows.push(c.val()));
+//   // Sort descending by score
+//   rows.sort((a, b) => b.score - a.score);
+//   renderLB(rows.slice(0, 10));
+// });
+
+const topQ = query(scoresRef, orderByChild('score'), limitToLast(10));
+
+onValue(topQ, snap => {
   const rows = [];
   snap.forEach(c => rows.push(c.val()));
-  // Sort descending by score
-  rows.sort((a, b) => b.score - a.score);
-  renderLB(rows.slice(0, 10));
+  rows.reverse();
+  renderLB(rows);
 });
 
 function renderLB(rows) {
