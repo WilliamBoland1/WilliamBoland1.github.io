@@ -179,34 +179,70 @@ async function submitScore(name, score) {
   return false; // not a new best
 }
 
-// Live leaderboard — listen to entire scores node, sort client-side, show top 10
-const scoresRef = ref(db, 'scores');
 onValue(query(scoresRef, orderByChild('score')), snap => {
+  console.log("🔥 Firebase snapshot received");
+
   const rows = [];
-  snap.forEach(c => rows.push(c.val()));
-  // Sort descending by score
+
+  snap.forEach((child, index) => {
+    const val = child.val();
+
+    console.log(`📦 Entry ${index}:`, {
+      key: child.key,
+      data: val
+    });
+
+    rows.push(val);
+  });
+
+  console.log("📊 Raw rows array:", rows);
+
+  // Sort descending
   rows.sort((a, b) => b.score - a.score);
-  renderLB(rows); 
+
+  console.log("🏆 Sorted rows:", rows);
+
+  renderLB(rows);
 });
 
 
 
 function renderLB(rows) {
+  console.log("🎨 Rendering leaderboard...");
+  console.log("📊 Rows received in renderLB:", rows);
+
   const myName = document.getElementById('player-name').value.trim().toLowerCase();
+  console.log("👤 Current player:", myName);
+
   const list = document.getElementById('lb-list');
+
   if (!rows.length) {
+    console.log("⚠️ No rows to display");
     list.innerHTML = '<div class="lb-empty">No scores yet —<br>be the first!</div>';
     return;
   }
-  list.innerHTML = rows.map((r, i) => {
+
+  const html = rows.map((r, i) => {
     const rc = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     const me = myName && r.name.toLowerCase() === myName;
+
+    console.log(`🔹 Row ${i}:`, {
+      name: r.name,
+      score: r.score,
+      rank: i + 1,
+      isMe: me
+    });
+
     return `<div class="lb-row${me ? ' me' : ''}">
       <div class="lb-rank ${rc}">${i + 1}</div>
       <div class="lb-name${me ? ' me-name' : ''}">${esc(r.name)}</div>
       <div class="lb-score">${r.score}</div>
     </div>`;
   }).join('');
+
+  console.log("🧱 Final HTML output:", html);
+
+  list.innerHTML = html;
 }
 
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
