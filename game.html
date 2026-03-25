@@ -201,9 +201,13 @@ onValue(query(scoresRef, orderByChild('score')), snap => {
   // Sort descending
   rows.sort((a, b) => b.score - a.score);
 
-  console.log("🏆 Sorted rows:", rows);
+  const top10 = rows.slice(0, 10);
 
-  renderLB(rows);
+  console.log("🏆 Sorted rows after slice:", rows);
+
+  renderLB(top10);
+
+  
 });
 
 
