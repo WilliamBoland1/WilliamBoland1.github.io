@@ -12,7 +12,7 @@ Live at **[williamboland1.github.io](https://williamboland1.github.io)**.
 | Page | What it is | Status |
 | --- | --- | --- |
 | [`application.html`](application.html) | My application for a volunteer position (verv) in the jubilee committee, written as a 90s infomercial | Done, and delivered |
-| [`game.html`](game.html) | A Flappy Bird prototype with an online leaderboard | Playable |
+| [`game.html`](game.html) | "Dypdykk 110": an underwater Flappy Bird for Mannhullet's 110th anniversary, with an online leaderboard | Playable |
 | [`globe.html`](globe.html) | An interactive 3D globe, meant as a gift for my girlfriend | Unfinished |
 | [`index.html`](index.html) / [`home.html`](home.html) | Landing page | Placeholder text, work in progress |
 
@@ -24,16 +24,38 @@ progress bars, testimonials and a call to action. Norwegian copy, deliberately
 over-the-top. Fonts are Passion One, Oswald and Special Elite from Google Fonts.
 The `loadImage()` helper lets you swap the profile photo from a file picker.
 
-### `game.html` — "Flakse Fugl"
+### `game.html` — "Dypdykk 110"
 
-A Flappy Bird clone on a 360×540 `<canvas>`. Gravity, one-button flap, procedurally
-placed pipes, and a score counter. The tuning constants live in one line near the top of
-the script if you want to make it easier or harder:
+A Flappy Bird clone reskinned for Mannhullet's 110th anniversary (the marine technology
+student association at NTNU). You steer a small yellow ROV on a tether through riveted steel
+bulkheads with brass-rimmed portholes. Every 10 points the water fades through depth stages:
+surface, mid water, deep navy, and a lamp-lit seabed, then back to the surface. It's used for
+weekly score contests, so the game rules are exactly the original Flakse Fugl ones. Only the
+look changed.
+
+The game runs in fixed 360×540 coordinates at exactly 60 updates per second on every screen,
+so 120 Hz phones play the same game as 60 Hz laptops. Everything is drawn in code; there are
+no image files. The page itself is just markup, and the code lives in `dypdykk/`:
+
+| File | What it holds |
+| --- | --- |
+| `dypdykk/style.css` | Page, brass frame, screens and leaderboard styling (colour tokens at the top) |
+| `dypdykk/js/constants.js` | Physics and difficulty. **Don't change these during a contest.** |
+| `dypdykk/js/config.js` | Every visual tuning value: colours, depth stages, particle counts |
+| `dypdykk/js/main.js` | Game state, fixed-step loop, input, pause |
+| `dypdykk/js/scoreboard.js` | Firebase leaderboard |
+| `dypdykk/js/render/obstacle.js` | Bulkhead drawing. Replace this file to restyle the obstacles. |
+| `dypdykk/js/render/rov.js` | ROV, tether and bubbles |
+| `dypdykk/js/render/background.js` | Water, light rays, marine snow, seabed |
 
 ```js
-const GH=55, PW=58, GAP=170, GR=0.44, JP=-8.5, PS=3, PINT=1600;
-//                              gravity  jump   pipe speed
+export const GH=55, PW=58, GAP=170, GR=0.44, JP=-8.5, PS=3, PINT=1600;
+//                               gravity  jump   pipe speed
 ```
+
+To embed it on another site, either point an `<iframe>` at the GitHub Pages URL, or copy
+`game.html` **and** the `dypdykk/` folder. When you release a change, bump the `?v=` number
+on the two links in `game.html` so browsers don't mix old and new files.
 
 The leaderboard is a Firebase Realtime Database (project `floppy-boland`, europe-west1).
 Scores are written under `scores/<name>` and only overwrite an existing entry if the new
@@ -70,10 +92,11 @@ rather than double-clicking the files — the game's Firebase module import need
 
 ```
 application.html   jubilee committee application
-game.html          Flappy Bird clone + Firebase leaderboard
+game.html          Dypdykk 110 (markup only)
+dypdykk/           the game's CSS and JS modules
 globe.html         Three.js globe with pins
 index.html         landing page (placeholder)
 home.html          landing page draft (placeholder)
-images/            image.jpg (bird texture), image2.jpg, image3.jpg
+images/            image.jpg (old bird texture, unused), image2.jpg, image3.jpg
 main.py            empty, ignore it
 ```
