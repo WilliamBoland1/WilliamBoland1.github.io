@@ -16,10 +16,10 @@ Firebase.
 
 - **Start:** a tap on the start screen, the button, Enter and Space all start a run once a
   name is typed. An empty name makes the input shake.
-- **Play:** the score goes up by 1 per bulkhead. Brushing the brass lip or the steel edge is a
-  crash; flying through the round collar is not.
+- **Play:** the score goes up by 1 per obstacle. Touching the crate's bottom, a container's
+  roof, or the rope (flying too high) is a crash.
 - **Depth:** the colours fade slowly at 10, 20 and 30, and return to light blue at 40.
-- **Crash:** "Tauet røk!" appears, the tether snaps and drifts away, "Prøv igjen" and "Meny"
+- **Crash:** "Kræsj!" appears, "Prøv igjen" and "Meny"
   work, and a new best shows up live in the Toppliste.
 - **Pause:** switching tabs in the middle of a run shows "Pause"; a tap or Space continues.
 - **DevTools:**

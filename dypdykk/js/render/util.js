@@ -31,7 +31,7 @@ export function roundRectPath(g, x, y, w, h, r) {
   g.closePath();
 }
 
-// Small domed fastener used on the bulkheads, lips and collar.
+// Small domed fastener (the shackle on the crate's sling).
 export function drawBolt(g, x, y, r, base, shine) {
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.beginPath(); g.arc(x + r * 0.35, y + r * 0.45, r * 1.1, 0, TAU); g.fill();

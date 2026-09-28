@@ -1,104 +1,156 @@
 // ══════════════════════════════════════════════════════════════════
-// OBSTACLE STYLE: riveted steel bulkhead with a brass-rimmed porthole.
+// OBSTACLE STYLE: a beer crate hanging on a rope above the opening,
+// and shipping containers stacked end-on below it.
 // Swap this file to restyle the obstacles; any replacement must export
 // an `Obstacle` with the same build(scale) / draw(ctx, pipe, x) shape.
-// It only draws: the collision box stays in collides() (main.js), and
-// the steel and lip edges are placed exactly on that box
-// (x-6 … x+PW+6, gap topH … topH+GAP).
+// It only draws: the collision box stays in collides() (main.js).
+// Collision box: x-6 … x+PW+6, solid above topH and below topH+GAP.
+//  - The crate's bottom and the top container's roof sit exactly on the
+//    opening, across the full width.
+//  - The rope runs down the LEFT edge of the box. The ROV never moves
+//    sideways, so it always meets a column at its left edge first: a crash
+//    above the crate always touches the rope, and the open water to the
+//    right of the rope can't be reached without hitting rope or crate.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
-import { W, H, GH, PW, GAP } from '../constants.js';
-import { TAU, makeSprite, drawBolt } from './util.js';
+import { H, GH, PW, GAP } from '../constants.js';
+import { TAU, makeSprite, roundRectPath, drawBolt } from './util.js';
 
 export const Obstacle = (() => {
   const O = CONFIG.obstacle, C = CONFIG.colors;
   const SW = PW + 12;                              // drawn width == collision width
-  const collarMid = GAP / 2 + O.collarWidth / 2;   // collar's inner edge sits on the gap
-  let steel, lip, collar, scale = 1;
+  const CH = O.crateHeight, SL = O.slingHeight, RW = O.ropeWidth, KH = O.containerHeight;
+  let rope, crate, containers = [], scale = 1;
 
-  // One tall steel strip with plate seams and rivets. Each bulkhead is sliced from it.
-  function buildSteel() {
-    const { c, g } = makeSprite(SW, H, scale);
-    const shade = g.createLinearGradient(0, 0, SW, 0);
-    shade.addColorStop(0, C.steelDark);
-    shade.addColorStop(0.28, C.steelLight);
-    shade.addColorStop(0.6, C.steel);
-    shade.addColorStop(1, C.steelDark);
-    g.fillStyle = shade; g.fillRect(0, 0, SW, H);
-    // edge flanges
-    g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(0, 0, 3, H); g.fillRect(SW - 3, 0, 3, H);
-    g.fillStyle = 'rgba(255,255,255,0.07)'; g.fillRect(3, 0, 1, H);
-    // horizontal plate seams, each with a row of rivets
-    for (let y = O.seamEvery; y < H; y += O.seamEvery) {
-      g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(0, y, SW, 1.5);
-      g.fillStyle = 'rgba(255,255,255,0.08)'; g.fillRect(0, y + 1.5, SW, 1);
-      for (let x = SW / 2 - 17; x <= SW / 2 + 17; x += 17) drawBolt(g, x, y + 6, 1.6, C.rivet, 'rgba(255,255,255,0.35)');
+  // One tall strip of twisted rope. Each obstacle slices the length it needs.
+  function buildRope() {
+    const { c, g } = makeSprite(RW, H, scale);
+    const shade = g.createLinearGradient(0, 0, RW, 0);
+    shade.addColorStop(0, C.ropeDark);
+    shade.addColorStop(0.4, C.rope);
+    shade.addColorStop(1, C.ropeDark);
+    g.fillStyle = shade; g.fillRect(0, 0, RW, H);
+    // the lay of the strands: short diagonal grooves
+    g.strokeStyle = 'rgba(60,45,25,0.55)'; g.lineWidth = 0.7;
+    for (let y = -RW; y < H; y += 3) { g.beginPath(); g.moveTo(0, y + RW); g.lineTo(RW, y); g.stroke(); }
+    return c;
+  }
+
+  // Crate seen from the side, bottle necks sticking out of the top, and a
+  // two-leg sling up to a shackle at the top-left where the rope ties on.
+  // Sprite origin: top of the sling. The crate body fills SL … SL+CH.
+  function buildCrate() {
+    const { c, g } = makeSprite(SW, SL + CH, scale);
+    const top = SL, bot = SL + CH;
+
+    // bottle necks and caps behind the rim
+    for (let i = 0; i < O.bottles; i++) {
+      const bx = SW * (i + 0.5) / O.bottles;
+      const neck = g.createLinearGradient(bx - 3, 0, bx + 3, 0);
+      neck.addColorStop(0, C.bottleDark); neck.addColorStop(0.35, C.bottle); neck.addColorStop(1, C.bottleDark);
+      g.fillStyle = neck; g.fillRect(bx - 2.5, top - 8, 5, 10);
+      g.fillStyle = 'rgba(255,255,255,0.25)'; g.fillRect(bx - 1.4, top - 7, 0.8, 7);
+      g.fillStyle = C.brass; g.fillRect(bx - 3.2, top - 10.5, 6.4, 3);
+      g.fillStyle = C.brassDark; g.fillRect(bx - 3.2, top - 8, 6.4, 0.6);
     }
-    // rivet columns along both edges
-    for (let y = 8; y < H; y += O.rivetEvery) {
-      drawBolt(g, 8, y, 1.6, C.rivet, 'rgba(255,255,255,0.35)');
-      drawBolt(g, SW - 8, y, 1.6, C.rivet, 'rgba(255,255,255,0.35)');
+
+    // body
+    const body = g.createLinearGradient(0, top, 0, bot);
+    body.addColorStop(0, C.crateLight);
+    body.addColorStop(0.5, C.crate);
+    body.addColorStop(1, C.crateDark);
+    g.fillStyle = body; g.fillRect(0, top, SW, CH);
+    // rims and corner posts
+    g.fillStyle = 'rgba(255,255,255,0.18)'; g.fillRect(0, top, SW, 5);
+    g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(0, top + 5, SW, 1); g.fillRect(0, bot - 4, SW, 4);
+    g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(0, top, 5, CH); g.fillRect(SW - 5, top, 5, CH);
+    g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(5, top + 5, 1, CH - 9);
+
+    // handle cut-out at the top, with a slot row on each side of it
+    const hw = 26;
+    g.fillStyle = C.crateHole;
+    roundRectPath(g, SW / 2 - hw / 2, top + 8, hw, 7, 3.5); g.fill();
+    for (let x = 9; x + 3 < SW - 8; x += 7) {
+      if (x + 3 > SW / 2 - hw / 2 - 3 && x < SW / 2 + hw / 2 + 3) continue;
+      roundRectPath(g, x, top + 9, 3, 6, 1.5); g.fill();
+    }
+    // lower band of vertical ribs around a plain centre plate with "110"
+    const plate = 24;
+    for (let x = 9; x + 3 < SW - 8; x += 7) {
+      if (x + 3 > SW / 2 - plate / 2 && x < SW / 2 + plate / 2) continue;
+      roundRectPath(g, x, top + 19, 3, CH - 26, 1.5); g.fill();
+    }
+    g.font = `600 11px ${O.crateFont}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const ty = top + 19 + (CH - 26) / 2;
+    g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillText('110', SW / 2 - 0.6, ty - 0.6);
+    g.fillStyle = C.crateDark; g.fillText('110', SW / 2, ty);
+
+    // sling: two legs from the shackle to the crate's top corners
+    const sx = RW / 2, sy = 3;
+    g.strokeStyle = C.ropeDark; g.lineWidth = 1.6; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(sx, sy); g.lineTo(2.5, top + 1);
+    g.moveTo(sx, sy); g.lineTo(SW - 2.5, top + 1); g.stroke();
+    g.strokeStyle = C.rope; g.lineWidth = 0.8;
+    g.beginPath(); g.moveTo(sx, sy); g.lineTo(SW - 2.5, top + 1); g.stroke();
+    drawBolt(g, sx, sy, 2.4, C.brassDark, C.brassLight);
+    return c;
+  }
+
+  // One container seen from the door end. Its roof is the sprite's top edge.
+  function buildContainer(p) {
+    const { c, g } = makeSprite(SW, KH, scale);
+    g.fillStyle = p.base; g.fillRect(0, 0, SW, KH);
+    // doors: faint vertical corrugation, split down the middle
+    for (let x = 6; x < SW - 6; x += 5) {
+      g.fillStyle = 'rgba(255,255,255,0.07)'; g.fillRect(x, 5, 2, KH - 11);
+      g.fillStyle = 'rgba(0,0,0,0.10)'; g.fillRect(x + 2, 5, 1.5, KH - 11);
+    }
+    g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(SW / 2 - 0.5, 5, 1, KH - 11);
+    // frame: corner posts, top and bottom rails
+    g.fillStyle = p.dark;
+    g.fillRect(0, 0, 5, KH); g.fillRect(SW - 5, 0, 5, KH);
+    g.fillRect(0, 0, SW, 5); g.fillRect(0, KH - 6, SW, 6);
+    g.fillStyle = p.light; g.fillRect(0, 0, SW, 1.2);
+    g.fillStyle = 'rgba(0,0,0,0.5)'; g.fillRect(0, KH - 1, SW, 1);   // seam to the container below
+    // corner castings with their oval holes
+    for (const [cx, cy] of [[0, 0], [SW - 7, 0], [0, KH - 7], [SW - 7, KH - 7]]) {
+      g.fillStyle = p.dark; g.fillRect(cx, cy, 7, 7);
+      g.fillStyle = 'rgba(0,0,0,0.6)';
+      g.beginPath(); g.ellipse(cx + 3.5, cy + 3.5, 2.2, 1.3, 0, 0, TAU); g.fill();
+    }
+    // locking bars, with cam keepers at the ends and a handle on each
+    for (const bx of [13, 26, SW - 28, SW - 15]) {
+      g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(bx + 1, 6, 2, KH - 12);
+      g.fillStyle = C.containerBar; g.fillRect(bx, 6, 2, KH - 12);
+      g.fillStyle = p.dark; g.fillRect(bx - 1, 6, 4, 3); g.fillRect(bx - 1, KH - 9, 4, 3);
+      const hx = bx < SW / 2 ? bx + 2 : bx - 6;
+      g.fillStyle = C.containerBar; g.fillRect(hx, KH * 0.58, 6, 1.8);
     }
     return c;
   }
 
-  // Brass lip that caps each steel piece at the opening.
-  function buildLip() {
-    const L = O.lipHeight;
-    const { c, g } = makeSprite(SW, L, scale);
-    const grad = g.createLinearGradient(0, 0, 0, L);
-    grad.addColorStop(0, C.brassLight);
-    grad.addColorStop(0.5, C.brass);
-    grad.addColorStop(1, C.brassDark);
-    g.fillStyle = grad; g.fillRect(0, 0, SW, L);
-    g.fillStyle = 'rgba(40,25,5,0.4)'; g.fillRect(0, 0, SW, 0.8); g.fillRect(0, L - 0.8, SW, 0.8);
-    for (let i = 1; i <= O.lipBolts; i++) drawBolt(g, SW * i / (O.lipBolts + 1), L / 2, 1.5, C.brassDark, C.brassLight);
-    return c;
+  function build(s) {
+    scale = s; rope = buildRope(); crate = buildCrate();
+    containers = O.containers.map(buildContainer);
   }
-
-  // Round bolted collar centred on the opening, so the gap reads as a porthole.
-  function buildCollar() {
-    const size = Math.ceil((collarMid + O.collarWidth / 2 + 3) * 2), m = size / 2;
-    const { c, g } = makeSprite(size, size, scale);
-    g.strokeStyle = 'rgba(0,0,0,0.25)'; g.lineWidth = O.collarWidth + 2;
-    g.beginPath(); g.arc(m + 1.5, m + 2, collarMid, 0, TAU); g.stroke();
-    const sheen = g.createLinearGradient(0, 0, size, size);
-    sheen.addColorStop(0, C.brassLight);
-    sheen.addColorStop(0.45, C.brass);
-    sheen.addColorStop(0.75, C.brassDark);
-    sheen.addColorStop(1, C.brass);
-    g.strokeStyle = sheen; g.lineWidth = O.collarWidth;
-    g.beginPath(); g.arc(m, m, collarMid, 0, TAU); g.stroke();
-    g.strokeStyle = 'rgba(40,25,5,0.45)'; g.lineWidth = 0.8;
-    g.beginPath(); g.arc(m, m, collarMid - O.collarWidth / 2, 0, TAU); g.stroke();
-    g.beginPath(); g.arc(m, m, collarMid + O.collarWidth / 2, 0, TAU); g.stroke();
-    for (let i = 0; i < O.collarBolts; i++) {
-      const a = (i + 0.5) / O.collarBolts * TAU;
-      drawBolt(g, m + Math.cos(a) * collarMid, m + Math.sin(a) * collarMid, 1.6, C.brassDark, C.brassLight);
-    }
-    return { c, size };
-  }
-
-  function build(s) { scale = s; steel = buildSteel(); lip = buildLip(); collar = buildCollar(); }
 
   // g: context, p: pipe, x: pipe x to draw at (may be interpolated between steps)
   function draw(g, p, x) {
-    const gx = x - 6, top = p.topH, bot = p.topH + GAP, floor = H - GH, L = O.lipHeight;
+    const gx = x - 6, top = p.topH, bot = p.topH + GAP, floor = H - GH;
 
-    // 1. Collar behind the plate, clipped out of the gap so no brass ever shows in open water.
-    g.save();
-    g.beginPath(); g.rect(0, 0, W, H); g.rect(gx, top, SW, GAP); g.clip('evenodd');
-    g.drawImage(collar.c, gx + SW / 2 - collar.size / 2, top + GAP / 2 - collar.size / 2, collar.size, collar.size);
-    g.restore();
+    // 1. Rope from the surface down to the shackle, on the column's left edge.
+    const crateY = top - CH - SL, ropeLen = crateY + 3;
+    if (ropeLen > 0) g.drawImage(rope, 0, 0, RW * scale, ropeLen * scale, gx, 0, RW, ropeLen);
+    // 2. Crate: its bottom edge is the top of the opening.
+    g.drawImage(crate, gx, crateY, SW, SL + CH);
 
-    // 2. Steel above and below, sliced from the pre-rendered strip.
-    const topLen = top - L, botY = bot + L, botLen = floor - botY;
-    if (topLen > 0) g.drawImage(steel, 0, 0, SW * scale, topLen * scale, gx, 0, SW, topLen);
-    if (botLen > 0) g.drawImage(steel, 0, botY * scale, SW * scale, botLen * scale, gx, botY, SW, botLen);
-
-    // 3. Brass lips: their inner edges sit exactly on the collision boundary.
-    g.drawImage(lip, gx, top - L, SW, L);
-    g.drawImage(lip, gx, bot, SW, L);
+    // 3. Containers stacked from the opening down; the seabed hides the cut-off base.
+    // Colour order comes from topH (not Math.random, which would shift pipe heights).
+    const n = containers.length, v = Math.floor(p.topH * 997) % n;
+    for (let y = bot, i = 0; y < floor; y += KH, i++) {
+      const h = Math.min(KH, floor - y), k = containers[(v + i) % n];
+      g.drawImage(k, 0, 0, SW * scale, h * scale, gx, y, SW, h);
+    }
   }
 
   return { build, draw };

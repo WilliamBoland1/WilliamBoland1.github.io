@@ -6,26 +6,18 @@ export const CONFIG = {
   colors: {
     navy: '#0B1F3A', cream: '#F3E9D2',
     brass: '#B08D57', brassLight: '#DCC08A', brassDark: '#6E5530',
-    steel: '#56626B', steelLight: '#7B8891', steelDark: '#2F383F', rivet: '#9AA6AE',
     rovBody: '#E9B82C', rovLight: '#F6D467', rovShade: '#B7861A', rovFrame: '#23282C',
     glass: '#8DB8C9', glassDeep: '#1D3E52',
-    tether: '#E6DCC3',
+    rope: '#D9CBA6', ropeDark: '#8C7A55',
+    crate: '#A23B2C', crateLight: '#C4553F', crateDark: '#6A2218', crateHole: 'rgba(30,10,8,0.7)',
+    bottle: '#9A5A1C', bottleDark: '#4E2A0C',
+    containerBar: '#B9BEC0',
     lamp: '255,238,196'          // rgb triple; alpha is applied in code
   },
   rov: {
     tiltMin: -18, tiltMax: 22,   // degrees: gentle visual clamp of the existing vy*4 angle
     lampAlpha: 0.28,             // headlamp glow strength
     lampReach: 72                // headlamp glow length in px
-  },
-  tether: {
-    segments: 6,                 // points trailing the anchor
-    spacing: 7,                  // px between points
-    follow: 0.014,               // catch-up rate per ms; lower = more lag
-    stretch: 0.7,                // max vertical offset per segment, as a fraction of spacing
-    wobble: 1.4,                 // px sine wobble at the tail
-    wobbleSpeed: 0.004,
-    snapDrift: 0.045,            // px/ms the loose tether drifts after it snaps
-    snapFade: 1400               // ms until the loose tether is gone
   },
   bubbles: {
     perFlap: 4, pool: 40,
@@ -34,12 +26,17 @@ export const CONFIG = {
     rise: 0.045                  // px/ms
   },
   obstacle: {
-    lipHeight: 9,                // brass lip on each edge of the opening
-    lipBolts: 3,
-    collarWidth: 8,              // round brass collar drawn behind the opening
-    collarBolts: 12,
-    seamEvery: 96,               // px between horizontal plate seams
-    rivetEvery: 16               // px between rivets along the plate edges
+    crateHeight: 44,             // beer crate above the opening (always full obstacle width)
+    slingHeight: 18,             // sling from the crate's top corners up to the rope
+    bottles: 5,                  // bottle necks showing above the crate rim
+    crateFont: 'Fraunces, Georgia, serif',
+    ropeWidth: 4,                // rope along the obstacle's left edge
+    containerHeight: 74,         // one container, door end (2.44 × 2.59 m at 70 px wide)
+    containers: [                // stacked in turn; the starting colour varies per obstacle
+      { base: '#8A4A32', light: '#B0694C', dark: '#5E2F1F' },   // rust red
+      { base: '#2F6468', light: '#4C8589', dark: '#1D4144' },   // faded teal
+      { base: '#56683A', light: '#768A55', dark: '#384625' }    // dull green
+    ]
   },
   depth: {
     every: 10,                   // points per depth stage

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════
-// PLAYER: yellow ROV with porthole, headlamp, tether and bubbles.
+// PLAYER: yellow ROV with porthole, headlamp and bubbles.
 // Visual only: position and hitbox still come from `bird`.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
@@ -7,10 +7,9 @@ import { PS, STEP } from '../constants.js';
 import { TAU, clamp, rand, particleScale, makeSprite, roundRectPath } from './util.js';
 
 export const Rov = (() => {
-  const R = CONFIG.rov, C = CONFIG.colors, T = CONFIG.tether, B = CONFIG.bubbles;
+  const R = CONFIG.rov, C = CONFIG.colors, B = CONFIG.bubbles;
   const SPR = { w: 54, h: 34, ox: 29, oy: 15 };   // sprite box and origin (ROV centre)
   const LAMP = { x: 17, y: 5 };                    // headlamp position in ROV space
-  const ANCHOR = -26;                              // tether attaches at the thruster
   let sprite, scale = 1, lampGlow = null;
 
   function buildSprite() {
@@ -55,56 +54,6 @@ export const Rov = (() => {
 
   function build(s) { scale = s; sprite = buildSprite(); lampGlow = null; }
 
-  // ── Tether: points chase the one in front of them, which gives the lag ──
-  const tether = { owner: null, pts: [], broken: false, age: 0 };
-
-  function resetTether(ax, ay) {
-    tether.pts = [];
-    for (let i = 0; i < T.segments; i++) tether.pts.push({ x: ax - (i + 1) * T.spacing, y: ay, vx: 0, vy: 0 });
-    tether.broken = false; tether.age = 0;
-  }
-
-  function updateTether(ax, ay, dt, snapped) {
-    if (snapped && !tether.broken) {
-      // "Tauet røk!": let the tether go and drift away
-      tether.broken = true; tether.age = 0;
-      tether.pts.forEach((p, i) => { p.vx = -T.snapDrift * (0.6 + i * 0.12); p.vy = rand(-0.01, 0.02); });
-    }
-    if (tether.broken) {
-      tether.age += dt;
-      for (const p of tether.pts) { p.x += p.vx * dt; p.y += p.vy * dt; }
-      return;
-    }
-    const k = 1 - Math.exp(-T.follow * dt);
-    const maxDy = T.spacing * T.stretch;           // keeps the tether short when the ROV moves fast
-    let prevY = ay;
-    tether.pts.forEach((p, i) => {
-      p.x = ax - (i + 1) * T.spacing;
-      p.y += (prevY - p.y) * k;
-      p.y = clamp(p.y, prevY - maxDy, prevY + maxDy);
-      prevY = p.y;
-    });
-  }
-
-  function drawTether(g, ax, ay, t) {
-    const alpha = tether.broken ? 1 - tether.age / T.snapFade : 1;
-    if (alpha <= 0) return;
-    const pts = tether.pts.map((p, i) => ({
-      x: p.x,
-      y: p.y + Math.sin(t * T.wobbleSpeed + i * 0.9) * T.wobble * (i + 1) / T.segments
-    }));
-    if (!tether.broken) pts.unshift({ x: ax, y: ay });
-    g.globalAlpha = alpha * 0.9;
-    g.strokeStyle = C.tether; g.lineWidth = 1.6; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length - 1; i++) {
-      g.quadraticCurveTo(pts[i].x, pts[i].y, (pts[i].x + pts[i + 1].x) / 2, (pts[i].y + pts[i + 1].y) / 2);
-    }
-    const end = pts[pts.length - 1];
-    g.lineTo(end.x, end.y); g.stroke();
-    g.globalAlpha = 1;
-  }
-
   // ── Bubbles: pooled so flapping never allocates ──
   const bubbles = Array.from({ length: B.pool }, () => ({ on: false, x: 0, y: 0, r: 0, age: 0, seed: 0 }));
 
@@ -142,22 +91,18 @@ export const Rov = (() => {
   }
 
   // ── Per-frame entry point ──
-  let lastFlap = 0;
+  let owner = null, lastFlap = 0;
   // lamp: headlamp strength (brighter in the deeper stages)
   function frame(g, b, x, y, t, dt, st, lamp = R.lampAlpha) {
     const tilt = clamp(b.angle, R.tiltMin, R.tiltMax) * Math.PI / 180;
     const cos = Math.cos(tilt), sin = Math.sin(tilt);
-    const ax = x + ANCHOR * cos, ay = y + ANCHOR * sin;
 
-    if (tether.owner !== b) { tether.owner = b; resetTether(ax, ay); lastFlap = 0; }
+    if (owner !== b) { owner = b; lastFlap = 0; }     // new run: new bird object
     // a new flap (flap counter jumped up) releases a few bubbles from the thruster
     if (b.flap > lastFlap) emitBubbles(x - 20 * cos + 6 * sin, y - 20 * sin - 6 * cos);
     lastFlap = b.flap;
 
-    updateTether(ax, ay, dt, st === 'dead');
     updateBubbles(dt, st === 'playing');
-
-    drawTether(g, ax, ay, t);
     drawBubbles(g);
 
     g.save();

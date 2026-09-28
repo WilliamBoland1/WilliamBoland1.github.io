@@ -8,9 +8,9 @@ change didn't alter gameplay, see [TESTING.md](TESTING.md).
 "Dypdykk 110" is an underwater reskin of the Flappy Bird clone that used to be called
 "Flakse Fugl". It was made for **Mannhullet's 110th anniversary**; Mannhullet is the marine
 technology student association at NTNU. It will be embedded on the jubilee website and used for
-**weekly Monday–Friday score contests**. The player steers a yellow ROV on a tether through
-riveted steel bulkheads with brass-rimmed portholes, and the water changes colour with depth
-as the score rises.
+**weekly Monday–Friday score contests**. The player steers a yellow ROV between beer crates hanging on
+ropes from above and shipping containers stacked on the seabed, and the water changes colour
+with depth as the score rises.
 
 - Live URL: `https://williamboland1.github.io/game.html`
 - The code has no build step and no dependencies, apart from Firebase and Google Fonts
@@ -30,6 +30,7 @@ These came from the original brief. They exist because the game is used for scor
    yet" message.
 3. **No new gameplay features:** no power-ups, collectibles, levels, or history/timeline content.
 4. **No image files.** Everything is drawn with canvas paths and gradients, or inline SVG.
+   (The beer crate was considered as a PNG and kept in canvas on purpose.)
 5. **Calm heritage look:** navy, cream and brass colours, Fraunces for titles, JetBrains Mono
    for numbers and labels. No neon and no arcade look.
 6. **All player-facing text is in Norwegian bokmål.**
@@ -42,7 +43,9 @@ If a request conflicts with one of these rules, ask William before doing it.
 | --- | --- |
 | **Fixed 60 Hz timestep.** `step()` holds the original per-frame update, run exactly 60×/s. Pipe spawning counts steps (`(simStep-lastPipe)*STEP > PINT`) instead of real time. | The original ran physics once per display frame but spawned pipes on a real-time clock, so 120 Hz screens got double speed and double pipe spacing. That's unfair in a contest. On a 60 Hz screen the game plays as it did before. |
 | **The first pipe always appears 1.6 s into a run.** | It's a side effect of the fixed step. Before, starting from the menu after waiting more than 1.6 s spawned a pipe immediately, while retrying waited 1.6 s. Now every run starts the same way. |
-| **The gap is drawn exactly as the hitbox,** plus a round brass collar behind it. | The hitbox gap is a 70×170 rectangle across the full width of the obstacle, so a truly round porthole can't match it. The steel and brass lips sit exactly on the collision edges. The collar is clipped out of the gap, so what you see always matches what you hit. |
+| **Obstacles: a beer crate on a rope above the gap, shipping containers below.** Replaced the steel bulkheads with a round brass collar, which read as a manhole and didn't work visually. | The crate's bottom and the top container's roof sit exactly on the gap edges, across the full 70 px width. Containers are stacked end-on from the gap down; the seabed covers the base of the lowest one. Their colour order comes from `topH`, not `Math.random` (see TESTING.md). |
+| **The rope runs down the left edge of the hitbox.** | The top hitbox is a solid 70 px column, but a rope is thin. The ROV never moves sideways and obstacles scroll toward it, so it always meets a column at its left edge first. A crash above the crate therefore always touches the rope, and the open water to the right of the rope can't be reached without hitting the rope or the crate. |
+| **No tether on the ROV.** | The trailing tether made the ROV look like a sperm cell. The crash title changed from "Tauet røk!" to "Kræsj!" to match. |
 | **Scoreboard strings translated, logic untouched.** | Bokmål throughout. "Lagrer…", "Ny personlig rekord lagret!" and similar messages are in `gameOver()` in main.js; "Ingen poeng ennå" is in scoreboard.js. |
 | **Replaced `game.html` in place** rather than making a new page. | The URL stays the same. The old Flakse Fugl is in git history (for example `cec7869:game.html`). |
 | **Split into modules** (CSS file + ES modules). | Easier to maintain, and the obstacle style can be swapped as one file. The page already needed HTTP because of Firebase. |
@@ -61,8 +64,8 @@ dypdykk/
                              pause/resume, input, fitCanvas() (high-DPI sizing)
   js/scoreboard.js           Firebase: nameKey, submitScore, onValue → renderLB. DO NOT CHANGE.
   js/render/util.js          pure helpers: makeSprite, drawBolt, colours, reducedMotion()
-  js/render/obstacle.js      Obstacle.build(scale) / draw(ctx, pipe, x): replace to restyle
-  js/render/rov.js           Rov.build(scale) / frame(ctx, bird, x, y, t, dt, state, lamp)
+  js/render/obstacle.js      Obstacle.build(scale) / draw(ctx, pipe, x): crate, rope, containers
+  js/render/rov.js           Rov.build(scale) / frame(ctx, bird, x, y, t, dt, state, lamp): ROV + bubbles
   js/render/background.js    Background.build / update / drawBack / drawFront / drawGround / lamp
 ```
 
@@ -71,8 +74,8 @@ dypdykk/
 to game state. Keep it that way, because it is what makes visual changes safe.
 
 **Frame order** (`render()` in main.js): water gradient → seabed glow → light rays → far
-silhouettes → far snow → near silhouettes → bulkheads → depth haze + near snow → seabed strip
-→ tether, bubbles, headlamp, ROV.
+silhouettes → far snow → near silhouettes → obstacles (rope, crate, containers) → depth haze +
+near snow → seabed strip → bubbles, headlamp, ROV.
 
 **Timing.**
 - `loop()` adds real frame time to an accumulator and runs `step()` in 1000/60 ms slices,
@@ -82,7 +85,7 @@ silhouettes → far snow → near silhouettes → bulkheads → depth haze + nea
   90/120 Hz screens. That offset is 0 at 60 Hz.
 - Visual effects use real `dt`.
 - `worldX = (simStep + a) * PS` drives everything that scrolls, so the seabed moves in exact
-  step with the bulkheads.
+  step with the obstacles.
 
 **Canvas sizing.**
 - CSS sets the on-screen size with `--game-w` in style.css: it fits the viewport, keeps the
@@ -93,8 +96,8 @@ silhouettes → far snow → near silhouettes → bulkheads → depth haze + nea
   canvas clears it.
 
 **Performance.**
-- Steel, lips, collar, ROV body, silhouettes and the seabed tile are pre-rendered once per
-  resize into offscreen canvases.
+- The rope strip, crate, three container colours, ROV body, silhouettes and the seabed tile
+  are pre-rendered once per resize into offscreen canvases.
 - Marine snow is drawn as one path per depth layer, and bubbles come from a fixed pool.
 - Measured about 0.4 ms per frame at a 990×1485 canvas, and about 2 ms (6.7 ms at worst)
   with 4× CPU throttle.
@@ -115,8 +118,9 @@ silhouettes → far snow → near silhouettes → bulkheads → depth haze + nea
 - **Tweak colours, depth stages or particle counts:** edit [js/config.js](js/config.js).
   Page colours are the tokens at the top of [style.css](style.css).
 - **Restyle the obstacles:** write a new `render/obstacle.js` that exports `Obstacle` with the
-  same `build(scale)` and `draw(ctx, pipe, x)`. It should draw the steel from `x-6` to
-  `x+PW+6`, with the opening from `pipe.topH` to `pipe.topH+GAP`, which is the hitbox.
+  same `build(scale)` and `draw(ctx, pipe, x)`. The hitbox is `x-6` to `x+PW+6`, solid above
+  `pipe.topH` and below `pipe.topH+GAP`. Anything the ROV can touch first must be drawn on that
+  box, which in practice means the left edge and the two gap edges.
 - **Change text:** screens are in `game.html`, save messages in `gameOver()` in main.js, and
   the empty-leaderboard message is in scoreboard.js.
 - **Release:** commit, push, and bump `?v=110` on both links in `game.html`.
