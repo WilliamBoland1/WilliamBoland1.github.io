@@ -47,5 +47,11 @@ export function hexToRgb(hex) {
   return [n >> 16, (n >> 8) & 255, n & 255];
 }
 
+// 'rgba(r,g,b,a)' or 'rgb(r,g,b)' → [r, g, b, a]
+export function parseRgba(css) {
+  const [r, g, b, a = 1] = css.match(/[\d.]+/g).map(Number);
+  return [r, g, b, a];
+}
+
 // [r, g, b] → CSS colour string
 export const rgbCss = c => `rgb(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])})`;

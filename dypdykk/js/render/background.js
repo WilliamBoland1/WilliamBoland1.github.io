@@ -7,7 +7,7 @@
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
 import { W, H, GH } from '../constants.js';
-import { TAU, lerp, reducedMotion, particleScale, makeSprite, hexToRgb, rgbCss } from './util.js';
+import { TAU, lerp, reducedMotion, particleScale, makeSprite, hexToRgb, parseRgba, rgbCss } from './util.js';
 
 // Small seeded PRNG, so the scenery is the same on every visit
 // (and never consumes Math.random, which the game uses for pipes).
@@ -124,18 +124,36 @@ export const Background = (() => {
   }
 
   // ── Seabed silhouettes: rocks and kelp, pre-rendered as seamless tiles ──
-  let scale = 1, farTile, nearTile, groundTile;
+  let scale = 1, farLayer, nearLayer, groundTile;
+  // The silhouette rims catch light from the surface, so they fade with the rays.
+  const fullRays = Math.max(...stages.map(s => s.rays)) || 1;
 
-  function buildSilhouette({ w, h }, color, seed, rocks, kelps, kelpMax) {
-    const { c, g } = makeSprite(w, h, scale);
+  // Returns { tile, rim, rimTop, rimH }: the silhouette tile, plus a band rimTop … rimTop+rimH
+  // of it holding a faint rim of surface light along the ridge, kept separate so it can fade.
+  // Both are softened with a blur (`blur` px) so the shapes read as glimpsed through murk
+  // rather than cut out. They are drawn on scratch sprites `pad` px wider on each side (and
+  // below), so the blur never fades against a tile edge, and the middle is cropped out.
+  function buildSilhouette({ w, h }, color, seed, rocks, kelps, kelpMax, blur) {
+    const pad = Math.ceil(blur * 3), sw = w + 2 * pad, sh = h + pad;
+    const rimTop = Math.floor(h * 0.47 - 4), rimH = Math.ceil(h * 0.77 + 4) - rimTop;   // ridge ± 0.15 h, plus the blur
+    const sharp = makeSprite(sw, sh, scale), soft = makeSprite(sw, sh, scale), lit = makeSprite(sw, rimH, scale);
+    const g = sharp.g;
+    g.translate(pad, 0); lit.g.translate(pad, -rimTop);
+    // Canvas filter lengths are device px (the transform doesn't scale them), hence `* scale`.
+    const blurCss = px => `blur(${px * scale}px)`;
     const r = seeded(seed);
     // Ridge line made of sines whose periods divide the tile width, so the tile wraps seamlessly.
     const p1 = r() * TAU, p2 = r() * TAU;
     const ridge = x => h * 0.62 + Math.sin(x * 2 * TAU / w + p1) * h * 0.1 + Math.sin(x * 5 * TAU / w + p2) * h * 0.05;
+    const lo = -4 * Math.ceil(pad / 4), hi = w - lo;      // run the ridge on past both seams
+    const ridgeLine = c => { for (let x = lo; x <= hi; x += 4) c.lineTo(x, ridge(x)); };
+    // Rim: the silhouette colour lifted toward cream, traced along the ridge top.
+    // Only lightly blurred, so it stays a thin line.
+    const [sr, sg, sb, sa] = parseRgba(color), cream = hexToRgb(C.cream);
+    lit.g.strokeStyle = `rgba(${[sr, sg, sb].map((v, i) => Math.round(lerp(v, cream[i], 0.6)))},${sa * 0.5})`;
+    lit.g.lineWidth = 1.2; lit.g.filter = blurCss(0.5);
+    lit.g.beginPath(); ridgeLine(lit.g); lit.g.stroke();
     g.fillStyle = color; g.strokeStyle = color; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(0, h);
-    for (let x = 0; x <= w; x += 4) g.lineTo(x, ridge(x));
-    g.lineTo(w, h); g.closePath(); g.fill();
     // Each shape is also drawn one tile width to each side, so nothing is cut at the seam.
     for (let i = 0; i < rocks; i++) {
       const x = r() * w, rw = 20 + r() * 40, rh = 10 + r() * 22, y = ridge(x) + 4;
@@ -156,14 +174,52 @@ export const Background = (() => {
         }
       }
     }
-    return c;
+    // Rocks and kelp stand in front of the ridge, so they also dim the rim where they cover it.
+    lit.g.filter = blurCss(blur); lit.g.globalCompositeOperation = 'destination-out';
+    lit.g.drawImage(sharp.c, 0, 0, sw * scale, sh * scale, -pad, 0, sw, sh);
+    // The ridge goes in behind them, then the whole silhouette is blurred in one pass.
+    g.globalCompositeOperation = 'destination-over';
+    g.beginPath(); g.moveTo(lo, sh); ridgeLine(g); g.lineTo(hi, sh); g.closePath(); g.fill();
+    soft.g.filter = blurCss(blur);
+    soft.g.drawImage(sharp.c, 0, 0, sw * scale, sh * scale, 0, 0, sw, sh);
+    // Crop out the middle.
+    const crop = (src, ch) => {
+      const t = makeSprite(w, ch, scale);
+      t.g.drawImage(src.c, pad * scale, 0, w * scale, ch * scale, 0, 0, w, ch);
+      return t.c;
+    };
+    return { tile: crop(soft, h), rim: crop(lit, rimH), rimTop, rimH };
   }
 
-  function drawTile(g, tile, { w, h }, factor, worldX) {
+  // top, th: which band of the tile this image covers (the whole tile by default).
+  function drawTile(g, tile, { w, h }, factor, worldX, top = 0, th = h) {
     const off = ((worldX * factor) % w + w) % w;
-    const y = FLOOR - h + 8;
-    g.drawImage(tile, -off, y, w, h);
-    g.drawImage(tile, w - off, y, w, h);
+    const y = FLOOR - h + 8 + top;
+    g.drawImage(tile, -off, y, w, th);
+    g.drawImage(tile, w - off, y, w, th);
+  }
+
+  // One seabed layer: the silhouettes, then their rim at the strength of the surface light.
+  function drawLayer(g, layer, size, factor, worldX) {
+    drawTile(g, layer.tile, size, factor, worldX);
+    const light = cur.rays / fullRays;
+    if (light < 0.01) return;
+    g.globalAlpha = light;
+    drawTile(g, layer.rim, size, factor, worldX, layer.rimTop, layer.rimH);
+    g.globalAlpha = 1;
+  }
+
+  // Soft dark ellipse where something meets the sand: a radial gradient squashed to rx × ry.
+  function contactShadow(g, x, y, rx, ry, alpha) {
+    g.save();
+    g.translate(x, y); g.scale(rx, ry);
+    const sh = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+    sh.addColorStop(0, `rgba(0,0,0,${alpha})`);
+    sh.addColorStop(0.5, `rgba(0,0,0,${alpha * 0.45})`);
+    sh.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = sh;
+    g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill();
+    g.restore();
   }
 
   // ── Seabed strip (the ground, which the ROV crashes into) ──
@@ -193,6 +249,7 @@ export const Background = (() => {
     // half-buried rocks, tops below the ground line
     for (let i = 0; i < 3; i++) {
       const x = 40 + i * 120 + r() * 60, rw = 26 + r() * 30, rh = 9 + r() * 7, top = 5 + r() * 5;
+      for (const ox of [-W, 0, W]) contactShadow(g, x + ox, top + rh, rw / 2 + 5, 3.5, 0.35);
       const rock = g.createLinearGradient(0, top, 0, top + rh);
       rock.addColorStop(0, S.rock);
       rock.addColorStop(1, S.rockDark);
@@ -273,8 +330,8 @@ export const Background = (() => {
     build(s) {
       scale = s;
       waterGrad = rayGrad = glowGrad = null;
-      farTile = buildSilhouette(FAR, S.silhouetteFar, 11, 6, 7, 110);
-      nearTile = buildSilhouette(NEAR, S.silhouetteNear, 23, 5, 6, 80);
+      farLayer = buildSilhouette(FAR, S.silhouetteFar, 11, 6, 7, 110, 1.5);
+      nearLayer = buildSilhouette(NEAR, S.silhouetteNear, 23, 5, 6, 80, 1);
       groundTile = buildGround();
       if (!snow.length) makeSnow();
     },
@@ -290,9 +347,9 @@ export const Background = (() => {
       drawWater(g);
       drawGlow(g);
       drawRays(g, t);
-      drawTile(g, farTile, FAR, S.parallaxFar, worldX);
+      drawLayer(g, farLayer, FAR, S.parallaxFar, worldX);
       drawSnow(g, false);
-      drawTile(g, nearTile, NEAR, S.parallaxNear, worldX);
+      drawLayer(g, nearLayer, NEAR, S.parallaxNear, worldX);
     },
     // In front of the bulkheads but behind the ROV: a faint wash of water colour
     // so the steel sits at the same depth as the scene, then the near snow.

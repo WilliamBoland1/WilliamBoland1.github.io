@@ -21,7 +21,8 @@ export const Obstacle = (() => {
   const SW = PW + 12;                              // drawn width == collision width
   const NECK = 10;                                 // bottle necks above the rim, part of the CRATE box
   const CH = CRATE - NECK, SL = O.slingHeight, RW = ROPE, KH = O.containerHeight;
-  let rope, crate, containers = [], scale = 1;
+  const SHX = 8, SHY = 8;                          // contact shadow: reach past each side, height above the floor
+  let rope, crate, containers = [], shadow, scale = 1;
 
   // One tall strip of twisted rope. Each obstacle slices the length it needs.
   function buildRope() {
@@ -131,9 +132,29 @@ export const Obstacle = (() => {
     return c;
   }
 
+  // Soft contact shadow where the bottom container meets the seabed: darkest at the floor
+  // line, fading upward and out past the corners. Only the half above the floor is built,
+  // because the seabed strip is drawn over everything below it.
+  function buildShadow() {
+    const w = SW + 2 * SHX, { c, g } = makeSprite(w, SHY, scale);
+    const up = g.createLinearGradient(0, SHY, 0, 0);
+    up.addColorStop(0, 'rgba(0,0,0,0.32)');
+    up.addColorStop(0.45, 'rgba(0,0,0,0.12)');
+    up.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = up; g.fillRect(0, 0, w, SHY);
+    // fade the ends: half strength at the container's corners, gone SHX beyond them
+    const ends = g.createLinearGradient(0, 0, w, 0), e = 2 * SHX / w;
+    ends.addColorStop(0, 'rgba(0,0,0,0)'); ends.addColorStop(e, '#000');
+    ends.addColorStop(1 - e, '#000'); ends.addColorStop(1, 'rgba(0,0,0,0)');
+    g.globalCompositeOperation = 'destination-in';
+    g.fillStyle = ends; g.fillRect(0, 0, w, SHY);
+    return c;
+  }
+
   function build(s) {
     scale = s; rope = buildRope(); crate = buildCrate();
     containers = O.containers.map(buildContainer);
+    shadow = buildShadow();
   }
 
   // g: context, p: pipe, x: pipe x to draw at (may be interpolated between steps)
@@ -153,6 +174,8 @@ export const Obstacle = (() => {
       const h = Math.min(KH, floor - y), k = containers[(v + i) % n];
       g.drawImage(k, 0, 0, SW * scale, h * scale, gx, y, SW, h);
     }
+    // 4. Contact shadow where the bottom container meets the sand.
+    g.drawImage(shadow, gx - SHX, floor - SHY, SW + 2 * SHX, SHY);
   }
 
   return { build, draw };
