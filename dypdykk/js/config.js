@@ -10,7 +10,8 @@ export const CONFIG = {
     glass: '#8DB8C9', glassDeep: '#1D3E52',
     rope: '#D9CBA6', ropeDark: '#8C7A55',
     crate: '#A23B2C', crateLight: '#C4553F', crateDark: '#6A2218', crateHole: 'rgba(30,10,8,0.7)',
-    bottle: '#9A5A1C', bottleDark: '#4E2A0C',
+    bottle: '#8A4A14', bottleLight: '#C98A3A', bottleDark: '#3E1F08',   // amber glass
+    label: '#EFE3C4', labelBand: '#A23B2C',                                // bottle labels
     containerBar: '#B9BEC0',
     lamp: '255,238,196'          // rgb triple; alpha is applied in code
   },

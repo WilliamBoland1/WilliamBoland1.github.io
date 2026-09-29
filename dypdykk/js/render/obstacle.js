@@ -38,54 +38,100 @@ export const Obstacle = (() => {
     return c;
   }
 
-  // Crate seen from the side, bottle necks sticking out of the top, and a
-  // two-leg sling up to a shackle at the top centre where the rope ties on.
+  // Amber glass shading across a bottle of width w centred on cx: dark edges,
+  // warm glow left of centre (light through the beer).
+  function glass(g, cx, w) {
+    const gr = g.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0);
+    gr.addColorStop(0, C.bottleDark); gr.addColorStop(0.3, C.bottleLight);
+    gr.addColorStop(0.55, C.bottle); gr.addColorStop(1, C.bottleDark);
+    return gr;
+  }
+
+  // Crate of beer seen from the side: amber bottles stand in a row of open
+  // windows, their necks and crown caps sticking out above the rim, and a
+  // two-leg sling runs up to a shackle at the top centre where the rope ties on.
   // Sprite origin: top of the sling. The crate body fills SL … SL+CH.
   function buildCrate() {
     const { c, g } = makeSprite(SW, SL + CH, scale);
     const top = SL, bot = SL + CH;
+    const P = 5, RIB = 2.5, n = O.bottles;          // corner posts, ribs between the windows
+    const WW = (SW - 2 * P - (n - 1) * RIB) / n;    // window width; one bottle per window
+    const bx = i => P + i * (WW + RIB) + WW / 2;    // bottle centre line
+    const BAND = 13, WY = top + BAND + 1, WH = CH - BAND - 8;   // window top and height
 
-    // bottle necks and caps behind the rim
-    for (let i = 0; i < O.bottles; i++) {
-      const bx = SW * (i + 0.5) / O.bottles;
-      const neck = g.createLinearGradient(bx - 3, 0, bx + 3, 0);
-      neck.addColorStop(0, C.bottleDark); neck.addColorStop(0.35, C.bottle); neck.addColorStop(1, C.bottleDark);
-      g.fillStyle = neck; g.fillRect(bx - 2.5, top - 8, 5, 10);
-      g.fillStyle = 'rgba(255,255,255,0.25)'; g.fillRect(bx - 1.4, top - 7, 0.8, 7);
-      g.fillStyle = C.brass; g.fillRect(bx - 3.2, top - 10.5, 6.4, 3);
-      g.fillStyle = C.brassDark; g.fillRect(bx - 3.2, top - 8, 6.4, 0.6);
+    // Necks and crown caps above the rim (drawn first so the rim covers their base)
+    for (let i = 0; i < n; i++) {
+      const x = bx(i), capY = top - NECK;
+      g.fillStyle = glass(g, x, 5.6);
+      g.beginPath();                                 // neck flares slightly towards the shoulder
+      g.moveTo(x - 2.2, capY + 2.6); g.lineTo(x + 2.2, capY + 2.6);
+      g.lineTo(x + 2.8, top); g.lineTo(x - 2.8, top); g.closePath(); g.fill();
+      g.fillStyle = C.label; g.fillRect(x - 2.5, top - 4.6, 5, 2.2);          // neck label
+      g.fillStyle = C.labelBand; g.fillRect(x - 2.5, top - 3.9, 5, 0.8);
+      g.fillStyle = 'rgba(255,240,210,0.45)'; g.fillRect(x - 1.5, capY + 3, 0.7, 4.6);   // glint
+      // crown cap: domed top, crimped skirt
+      const cap = g.createLinearGradient(x - 3, 0, x + 3, 0);
+      cap.addColorStop(0, C.brassDark); cap.addColorStop(0.35, C.brassLight); cap.addColorStop(1, C.brassDark);
+      g.fillStyle = cap; roundRectPath(g, x - 3, capY, 6, 3, 1); g.fill();
+      g.fillStyle = 'rgba(40,25,5,0.55)';
+      for (let k = -2.4; k <= 2.4; k += 1.2) g.fillRect(x + k - 0.2, capY + 1.5, 0.4, 1.5);
+      g.fillStyle = 'rgba(255,245,220,0.5)'; g.fillRect(x - 2, capY + 0.3, 3, 0.6);
     }
 
-    // body
+    // Crate body
     const body = g.createLinearGradient(0, top, 0, bot);
     body.addColorStop(0, C.crateLight);
     body.addColorStop(0.5, C.crate);
     body.addColorStop(1, C.crateDark);
     g.fillStyle = body; g.fillRect(0, top, SW, CH);
-    // rims and corner posts
-    g.fillStyle = 'rgba(255,255,255,0.18)'; g.fillRect(0, top, SW, 5);
-    g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(0, top + 5, SW, 1); g.fillRect(0, bot - 4, SW, 4);
-    g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(0, top, 5, CH); g.fillRect(SW - 5, top, 5, CH);
-    g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(5, top + 5, 1, CH - 9);
 
-    // handle cut-out at the top, with a slot row on each side of it
-    const hw = 26;
+    // Windows: dark inside, a bottle standing in each, shaded by the band above
+    for (let i = 0; i < n; i++) {
+      const x = bx(i), x0 = x - WW / 2;
+      g.save();
+      roundRectPath(g, x0, WY, WW, WH, 1.8); g.clip();
+      g.fillStyle = C.crateHole; g.fillRect(x0, WY, WW, WH);
+      const bw = WW - 1.6;
+      g.fillStyle = glass(g, x, bw); g.fillRect(x - bw / 2, WY, bw, WH);
+      // paper label wrapped round the bottle, with a coloured band and a small oval
+      const ly = WY + 5, lh = 10;
+      const paper = g.createLinearGradient(x - bw / 2, 0, x + bw / 2, 0);
+      paper.addColorStop(0, 'rgba(0,0,0,0.35)'); paper.addColorStop(0.3, 'rgba(0,0,0,0)');
+      paper.addColorStop(0.75, 'rgba(0,0,0,0)'); paper.addColorStop(1, 'rgba(0,0,0,0.4)');
+      g.fillStyle = C.label; g.fillRect(x - bw / 2, ly, bw, lh);
+      g.fillStyle = C.labelBand; g.fillRect(x - bw / 2, ly + lh - 3.2, bw, 1.6);
+      g.beginPath(); g.ellipse(x, ly + 3.2, bw * 0.26, 1.7, 0, 0, TAU); g.fill();
+      g.fillStyle = C.brass; g.fillRect(x - bw / 2, ly, bw, 0.6); g.fillRect(x - bw / 2, ly + lh - 0.6, bw, 0.6);
+      g.fillStyle = paper; g.fillRect(x - bw / 2, ly, bw, lh);
+      g.fillStyle = 'rgba(255,240,210,0.5)'; g.fillRect(x - bw / 2 + 1.6, WY, 0.8, WH);   // glint
+      // shadow of the band above, and the window's inner edge
+      const sh = g.createLinearGradient(0, WY, 0, WY + 5);
+      sh.addColorStop(0, 'rgba(20,6,4,0.6)'); sh.addColorStop(1, 'rgba(20,6,4,0)');
+      g.fillStyle = sh; g.fillRect(x0, WY, WW, 5);
+      g.restore();
+      g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 0.6;
+      roundRectPath(g, x0 + 0.3, WY + 0.3, WW - 0.6, WH - 0.6, 1.6); g.stroke();
+      g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(x0 + WW, WY + 1, 0.6, WH - 2);   // lit rib edge
+    }
+
+    // Rim, corner posts and foot
+    g.fillStyle = 'rgba(255,255,255,0.2)'; g.fillRect(0, top, SW, 4);
+    g.fillStyle = 'rgba(255,245,220,0.35)'; g.fillRect(0, top, SW, 0.8);
+    g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(0, top + 4, SW, 0.8);
+    g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(0, top, P, CH); g.fillRect(SW - P, top, P, CH);
+    g.fillStyle = 'rgba(255,255,255,0.14)'; g.fillRect(P, top + 4.8, 0.8, CH - 10);
+    g.fillStyle = 'rgba(0,0,0,0.28)'; g.fillRect(0, bot - 5, SW, 5);
+    g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(0, bot - 5, SW, 0.6);
+
+    // Band under the rim: a hand hole at each end and an "ØL" plate in the middle
+    const bandY = top + 4.8, bandH = BAND - 4.8;
     g.fillStyle = C.crateHole;
-    roundRectPath(g, SW / 2 - hw / 2, top + 8, hw, 7, 3.5); g.fill();
-    for (let x = 9; x + 3 < SW - 8; x += 7) {
-      if (x + 3 > SW / 2 - hw / 2 - 3 && x < SW / 2 + hw / 2 + 3) continue;
-      roundRectPath(g, x, top + 9, 3, 6, 1.5); g.fill();
-    }
-    // lower band of vertical ribs around a plain centre plate with "110"
-    const plate = 24;
-    for (let x = 9; x + 3 < SW - 8; x += 7) {
-      if (x + 3 > SW / 2 - plate / 2 && x < SW / 2 + plate / 2) continue;
-      roundRectPath(g, x, top + 19, 3, CH - 26, 1.5); g.fill();
-    }
-    g.font = `600 11px ${O.crateFont}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    const ty = top + 19 + (CH - 26) / 2;
-    g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillText('110', SW / 2 - 0.6, ty - 0.6);
-    g.fillStyle = C.crateDark; g.fillText('110', SW / 2, ty);
+    for (const hx of [P + 3, SW - P - 3 - 12]) { roundRectPath(g, hx, bandY + 2, 12, 4.4, 2.2); g.fill(); }
+    const pw = 22, ph = bandH - 1.6, px = SW / 2 - pw / 2, py = bandY + 0.8;
+    g.fillStyle = C.label; roundRectPath(g, px, py, pw, ph, 1.2); g.fill();
+    g.strokeStyle = C.brassDark; g.lineWidth = 0.5; roundRectPath(g, px + 0.8, py + 0.8, pw - 1.6, ph - 1.6, 0.8); g.stroke();
+    g.font = `600 6.4px ${O.crateFont}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = C.crateDark; g.fillText('ØL', SW / 2, py + ph / 2 + 0.3);
 
     // sling: two legs from the shackle to the crate's top corners
     const sx = SW / 2, sy = 3;
