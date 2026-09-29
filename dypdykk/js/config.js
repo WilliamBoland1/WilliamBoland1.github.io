@@ -68,5 +68,12 @@ export const CONFIG = {
     groundTint: 0.35,            // how strongly the seabed takes on the water colour
     glow: '255,186,110'          // rgb of the warm seabed glow
   },
+  sealife: {                     // distant fish and jellyfish behind the far ridge
+    color: '#061428',            // silhouette colour
+    alpha: 0.24,                 // strength near the surface; fades with the light rays
+    glow: 0.16,                  // faint cream rim on the jellyfish once the light is gone
+    parallax: 0.12,              // fraction of world speed (the far ridge moves at 0.15)
+    blur: 0.8                    // px of softening, so they sit in the murk like the ridges
+  },
   reducedMotion: { particleScale: 0.4 }
 };

@@ -1,25 +1,15 @@
 // ══════════════════════════════════════════════════════════════════
-// BACKGROUND: depth-stage water colour, light rays, marine snow,
-// seabed silhouettes and the scrolling seabed strip. Visual only.
+// BACKGROUND: depth-stage water colour, light rays, distant sea life
+// (sealife.js), marine snow, seabed silhouettes and the scrolling
+// seabed strip. Visual only.
 // Everything that moves with the world is driven by `worldX`, which
 // main.js derives from the simulation, so the seabed scrolls exactly
 // in step with the bulkheads.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
 import { W, H, GH } from '../constants.js';
-import { TAU, lerp, reducedMotion, particleScale, makeSprite, hexToRgb, parseRgba, rgbCss } from './util.js';
-
-// Small seeded PRNG, so the scenery is the same on every visit
-// (and never consumes Math.random, which the game uses for pipes).
-function seeded(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a = a + 0x6D2B79F5 | 0;
-    let t = Math.imul(a ^ a >>> 15, 1 | a);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-}
+import { TAU, lerp, reducedMotion, particleScale, makeSprite, hexToRgb, parseRgba, rgbCss, seeded } from './util.js';
+import { SeaLife } from './sealife.js';
 
 // Point on a quadratic curve, used to place kelp leaves along a strand.
 const quad = (p0, p1, p2, t) => (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
@@ -159,19 +149,34 @@ export const Background = (() => {
       const x = r() * w, rw = 20 + r() * 40, rh = 10 + r() * 22, y = ridge(x) + 4;
       for (const ox of [-w, 0, w]) { g.beginPath(); g.ellipse(x + ox, y, rw / 2, rh, 0, Math.PI, TAU); g.fill(); }
     }
+    // One kelp strand from (x0, base): `bend` pulls the middle sideways, `tip` places the top.
+    const strand = (x0, base, len, bend, tip, lw, leaves, leaf) => {
+      const x1 = x0 + bend, x2 = x0 + tip;
+      g.lineWidth = lw;
+      g.beginPath(); g.moveTo(x0, base); g.quadraticCurveTo(x1, base - len / 2, x2, base - len); g.stroke();
+      for (let j = 1; j <= leaves; j++) {         // small leaves along the strand
+        const tt = j / (leaves + 1), side = j % 2 ? 1 : -1;
+        g.beginPath();
+        g.ellipse(quad(x0, x1, x2, tt) + side * 4 * leaf, quad(base, base - len / 2, base - len, tt), 5 * leaf, 1.8 * leaf, side * 0.6, 0, TAU);
+        g.fill();
+      }
+    };
+    // Kelp grows in clumps: a main strand plus one or two shorter siblings from the same root,
+    // splaying out to either side. The siblings use their own generator, so the main strands
+    // keep the positions the rest of the layout was drawn around.
+    const rs = seeded(seed + 101);
     for (let i = 0; i < kelps; i++) {
       const x = r() * w, len = kelpMax * (0.5 + r() * 0.5), base = ridge(x) + 6;
       const bend = (r() - 0.5) * 24, lw = 2 + r() * 2;
+      const lean = bend < 0 ? -1 : 1;
+      const siblings = Array.from({ length: 1 + Math.floor(rs() * 2) }, (_, k) => {
+        const dir = k === 0 ? -lean : lean;       // the first leans against the main strand, the second with it
+        const sb = dir * (8 + rs() * 10);
+        return { dx: dir * (1.5 + rs() * 2), len: len * (0.5 + rs() * 0.3), bend: sb, tip: sb * (0.7 + rs() * 0.4), lw: lw * (0.6 + rs() * 0.2) };
+      });
       for (const ox of [-w, 0, w]) {
-        const x0 = x + ox, x1 = x0 + bend, x2 = x0 + bend * 0.3;
-        g.lineWidth = lw;
-        g.beginPath(); g.moveTo(x0, base); g.quadraticCurveTo(x1, base - len / 2, x2, base - len); g.stroke();
-        for (let j = 1; j <= 4; j++) {            // small leaves along the strand
-          const tt = j / 5, side = j % 2 ? 1 : -1;
-          g.beginPath();
-          g.ellipse(quad(x0, x1, x2, tt) + side * 4, quad(base, base - len / 2, base - len, tt), 5, 1.8, side * 0.6, 0, TAU);
-          g.fill();
-        }
+        for (const s of siblings) strand(x + ox + s.dx, base, s.len, s.bend, s.tip, s.lw, 3, 0.8);
+        strand(x + ox, base, len, bend, bend * 0.3, lw, 4, 1);
       }
     }
     // Rocks and kelp stand in front of the ridge, so they also dim the rim where they cover it.
@@ -333,6 +338,7 @@ export const Background = (() => {
       farLayer = buildSilhouette(FAR, S.silhouetteFar, 11, 6, 7, 110, 1.5);
       nearLayer = buildSilhouette(NEAR, S.silhouetteNear, 23, 5, 6, 80, 1);
       groundTile = buildGround();
+      SeaLife.build(s);
       if (!snow.length) makeSnow();
     },
     // Advance colours and particles. dt: real ms, score: current score, worldX: px scrolled.
@@ -342,11 +348,13 @@ export const Background = (() => {
       lastWorldX = worldX;
       updateSnow(dt, dx, t);
     },
-    // Behind the bulkheads: water, glow, rays, far silhouettes, far snow, near silhouettes.
+    // Behind the bulkheads: water, glow, rays, distant sea life, far silhouettes, far snow,
+    // near silhouettes.
     drawBack(g, t, worldX) {
       drawWater(g);
       drawGlow(g);
       drawRays(g, t);
+      SeaLife.draw(g, t, worldX, cur.rays / fullRays);
       drawLayer(g, farLayer, FAR, S.parallaxFar, worldX);
       drawSnow(g, false);
       drawLayer(g, nearLayer, NEAR, S.parallaxNear, worldX);

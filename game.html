@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <!-- Bump ?v= on each release so browsers don't mix old and new files -->
-  <link rel="stylesheet" href="dypdykk/style.css?v=114"/>
+  <link rel="stylesheet" href="dypdykk/style.css?v=115"/>
 </head>
 <body>
 <div id="layout">
@@ -69,11 +69,23 @@
       <div id="lb-title">Toppliste</div>
       <div id="lb-sub">Beste poeng per spiller · Topp 10</div>
     </div>
+    <!-- brass divider with a small porthole in the middle -->
+    <div class="lb-ornament" aria-hidden="true">
+      <span class="lb-ornament-line"></span>
+      <svg viewBox="0 0 16 16">
+        <circle class="orn-ring" cx="8" cy="8" r="5.2"/>
+        <g class="orn-bolts">
+          <circle cx="8" cy="2.8" r="0.8"/><circle cx="13.2" cy="8" r="0.8"/>
+          <circle cx="8" cy="13.2" r="0.8"/><circle cx="2.8" cy="8" r="0.8"/>
+        </g>
+      </svg>
+      <span class="lb-ornament-line"></span>
+    </div>
     <div id="lb-list"><div class="lb-empty">Laster…</div></div>
     <div id="lb-footer">Oppdateres live</div>
   </div>
 </div>
 
-<script type="module" src="dypdykk/js/main.js?v=114"></script>
+<script type="module" src="dypdykk/js/main.js?v=115"></script>
 </body>
 </html>

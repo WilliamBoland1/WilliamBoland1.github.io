@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════
-// PLAYER: yellow ROV with porthole, headlamp and bubbles.
+// PLAYER: yellow toy-bathyscaphe ROV with porthole, headlamp and bubbles.
 // Visual only: position and hitbox still come from `bird`.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
@@ -12,39 +12,103 @@ export const Rov = (() => {
   const LAMP = { x: 17, y: 5 };                    // headlamp position in ROV space
   let sprite, scale = 1, lampGlow = null;
 
+  // A toy bathyscaphe: round-nosed hull with a big porthole, a brass band and hatch,
+  // two raked skid-fins, and a ducted thruster that hangs a little low, with a tail fin.
+  // It fills the same box as before, around the unchanged hitbox (±14 × ±10).
   function buildSprite() {
     const { c, g } = makeSprite(SPR.w, SPR.h, scale);
     g.translate(SPR.ox, SPR.oy);
-    // skids and frame legs
-    g.fillStyle = C.rovFrame;
-    roundRectPath(g, -15, 11, 30, 3, 1.5); g.fill();
-    g.fillRect(-11, 8, 2, 4); g.fillRect(9, 8, 2, 4);
-    // rear thruster with a brass ring
-    roundRectPath(g, -26, -5, 9, 10, 2); g.fill();
-    g.fillStyle = C.brass; g.fillRect(-23, -5, 1.5, 10);
-    // body
-    const body = g.createLinearGradient(0, -11, 0, 10);
+    const outline = 'rgba(70,45,0,0.5)';
+    // skid-fins under the belly, raked back, each on a small brass shoe (the hull covers their roots)
+    for (const fx of [-7, 8]) {
+      g.fillStyle = C.rovFrame;
+      g.beginPath();
+      g.moveTo(fx - 3, 7); g.lineTo(fx + 3, 7);
+      g.quadraticCurveTo(fx + 1.5, 10.5, fx - 1, 12.5);
+      g.lineTo(fx - 5, 12.5);
+      g.quadraticCurveTo(fx - 4.5, 10, fx - 3, 7);
+      g.fill();
+      g.fillStyle = C.brass;
+      roundRectPath(g, fx - 6.5, 12, 7, 1.8, 0.9); g.fill();
+    }
+    // ducted thruster: flares toward the back, more below than above
+    const duct = g.createLinearGradient(0, -5, 0, 9);
+    duct.addColorStop(0, '#3E474D');
+    duct.addColorStop(1, C.rovFrame);
+    g.fillStyle = duct;
+    g.beginPath();
+    g.moveTo(-14, -2.5); g.lineTo(-24.5, -3.8);
+    g.quadraticCurveTo(-26.5, 2, -24.5, 7.8);
+    g.lineTo(-14, 5.5);
+    g.closePath(); g.fill();
+    // propeller hub, then the brass ring on the duct's rim, seen edge-on
+    g.fillStyle = C.brass;
+    g.beginPath(); g.moveTo(-25, 0.3); g.lineTo(-28.5, 2); g.lineTo(-25, 3.7); g.fill();
+    g.strokeStyle = C.brass; g.lineWidth = 1.3;
+    g.beginPath(); g.ellipse(-24.7, 2, 1.2, 5.6, 0, 0, TAU); g.stroke();
+    // tail fin on top of the duct
+    g.fillStyle = C.rovShade;
+    g.beginPath();
+    g.moveTo(-12, -7); g.lineTo(-21.5, -3.8); g.lineTo(-24, -10.5);
+    g.quadraticCurveTo(-22.8, -12.6, -19.5, -11.6);
+    g.closePath(); g.fill();
+    g.strokeStyle = outline; g.lineWidth = 0.8; g.stroke();
+    // hull: domed top curving into a big round nose, a flat belly, a rounded stern
+    const hull = () => {
+      g.beginPath();
+      g.moveTo(-9, -11);
+      g.bezierCurveTo(1, -12.5, 10, -12, 13.5, -5.5);
+      g.bezierCurveTo(16.5, 0, 15, 8, 8, 9);
+      g.lineTo(-10, 9);
+      g.bezierCurveTo(-15.5, 9, -17, 5, -17, 0);
+      g.bezierCurveTo(-17, -7, -14.5, -11, -9, -11);
+      g.closePath();
+    };
+    const body = g.createLinearGradient(0, -12, 0, 9);
     body.addColorStop(0, C.rovLight);
     body.addColorStop(0.45, C.rovBody);
     body.addColorStop(1, C.rovShade);
     g.fillStyle = body;
-    roundRectPath(g, -18, -11, 34, 21, 6); g.fill();
-    g.strokeStyle = 'rgba(70,45,0,0.5)'; g.lineWidth = 1; g.stroke();
-    // frame bar and a thin highlight along the top
-    g.fillStyle = 'rgba(35,40,44,0.5)'; g.fillRect(-9, -11, 2, 21);
-    g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(-13, -9.5, 22, 1.2);
-    // porthole: brass rim, deep glass, small highlight
+    hull(); g.fill();
+    // brass band around the hull, with rivets
+    g.save(); hull(); g.clip();
+    const band = g.createLinearGradient(-9, 0, -4, 0);
+    band.addColorStop(0, C.brass);
+    band.addColorStop(0.4, C.brassLight);
+    band.addColorStop(1, C.brass);
+    g.fillStyle = band; g.fillRect(-9, -13, 4.5, 23);
+    g.fillStyle = 'rgba(60,40,10,0.45)'; g.fillRect(-9, -13, 0.6, 23); g.fillRect(-5.1, -13, 0.6, 23);
+    g.fillStyle = C.brassDark;
+    for (const ry of [-6.5, -1, 4.5]) { g.beginPath(); g.arc(-6.75, ry, 0.7, 0, TAU); g.fill(); }
+    g.restore();
+    hull(); g.strokeStyle = outline; g.lineWidth = 1; g.stroke();
+    // hatch on top of the band
+    const hatch = g.createLinearGradient(0, -14.5, 0, -11);
+    hatch.addColorStop(0, C.brassLight);
+    hatch.addColorStop(1, C.brassDark);
+    g.fillStyle = hatch;
+    g.beginPath(); g.ellipse(-6.75, -11.2, 3.6, 2.9, 0, Math.PI, TAU); g.fill();
+    g.fillStyle = C.brassDark; roundRectPath(g, -11, -11.7, 8.5, 1.4, 0.7); g.fill();
+    // sheen along the top
+    g.strokeStyle = 'rgba(255,255,255,0.4)'; g.lineWidth = 1.2; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(-14.5, -5); g.quadraticCurveTo(-13, -9.6, -8, -9.9); g.moveTo(-3, -10.2); g.quadraticCurveTo(0, -10.5, 1, -10.4); g.stroke();
+    // porthole: brass rim with small bolts, deep glass, small highlight
     g.fillStyle = C.brass;
-    g.beginPath(); g.arc(7, -1, 7.5, 0, TAU); g.fill();
+    g.beginPath(); g.arc(6, -1, 7.5, 0, TAU); g.fill();
     g.strokeStyle = C.brassDark; g.lineWidth = 0.8; g.stroke();
-    const glass = g.createRadialGradient(5.5, -3, 0.5, 7, -1, 5.5);
+    g.fillStyle = C.brassDark;
+    for (let i = 0; i < 8; i++) {
+      const a = i * TAU / 8 + TAU / 16;
+      g.beginPath(); g.arc(6 + Math.cos(a) * 6.5, -1 + Math.sin(a) * 6.5, 0.45, 0, TAU); g.fill();
+    }
+    const glass = g.createRadialGradient(4.5, -3, 0.5, 6, -1, 5.5);
     glass.addColorStop(0, C.glass);
     glass.addColorStop(1, C.glassDeep);
     g.fillStyle = glass;
-    g.beginPath(); g.arc(7, -1, 5.5, 0, TAU); g.fill();
+    g.beginPath(); g.arc(6, -1, 5.5, 0, TAU); g.fill();
     g.fillStyle = 'rgba(255,255,255,0.55)';
-    g.beginPath(); g.arc(5, -3.3, 1.5, 0, TAU); g.fill();
-    // headlamp housing
+    g.beginPath(); g.arc(4, -3.3, 1.5, 0, TAU); g.fill();
+    // headlamp housing under the nose
     g.fillStyle = C.brassDark;
     g.beginPath(); g.arc(LAMP.x - 0.5, LAMP.y, 2.6, 0, TAU); g.fill();
     g.fillStyle = C.cream;
@@ -98,8 +162,8 @@ export const Rov = (() => {
     const cos = Math.cos(tilt), sin = Math.sin(tilt);
 
     if (owner !== b) { owner = b; lastFlap = 0; }     // new run: new bird object
-    // a new flap (flap counter jumped up) releases a few bubbles from the thruster
-    if (b.flap > lastFlap) emitBubbles(x - 20 * cos + 6 * sin, y - 20 * sin - 6 * cos);
+    // a new flap (flap counter jumped up) releases a few bubbles from the thruster duct
+    if (b.flap > lastFlap) emitBubbles(x - 27 * cos - 2 * sin, y - 27 * sin + 2 * cos);
     lastFlap = b.flap;
 
     updateBubbles(dt, st === 'playing');

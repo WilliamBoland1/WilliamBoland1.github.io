@@ -6,6 +6,18 @@ export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const rand = (lo, hi) => lo + Math.random() * (hi - lo);
 export const lerp = (a, b, t) => a + (b - a) * t;
 
+// Small seeded PRNG, so the scenery is the same on every visit
+// (and never consumes Math.random, which the game uses for pipes).
+export function seeded(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
 // Reduced-motion users get fewer particles and calmer movement.
 // Checked live, so toggling the OS setting takes effect without a reload.
 const reducedMotionMQ = matchMedia('(prefers-reduced-motion: reduce)');

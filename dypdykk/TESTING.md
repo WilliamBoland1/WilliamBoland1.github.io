@@ -21,11 +21,14 @@ Firebase.
   is allowed until the ROV reaches the rope.
 - **Depth:** the colours fade slowly at 10, 20 and 30, and return to light blue at 40.
 - **Crash:** "Kræsj!" appears, "Prøv igjen" and "Meny"
-  work, and a new best shows up live in the Toppliste.
+  work, and a new best shows up live in the Toppliste, where its row glows brass twice.
+  The top three ranks sit on brass, silver and bronze medallions.
 - **Pause:** switching tabs in the middle of a run shows "Pause"; a tap or Space continues.
 - **DevTools:**
   - Device toolbar at phone width: the frame fits and the leaderboard sits below.
-  - Rendering → "prefers-reduced-motion: reduce": fewer snow specks, and the rays stop swaying.
+  - Rendering → "prefers-reduced-motion: reduce": fewer snow specks, the rays stop swaying,
+    the distant fish and jellyfish stop wiggling and pulsing, and the leaderboard glow is a
+    single fade.
   - Performance with 4× CPU throttle: steady 60 fps.
 - **Speed:** on a 120 Hz screen, fall speed and pipe spacing match a 60 Hz screen.
 
@@ -89,7 +92,7 @@ edge), and none crashed earlier.
 untouched. Bubbles call it, and so did the old star field. If only `topH` values differ while
 `score`, `x` and timing match, suspect that first. To confirm, consume the same number of
 randoms in the test copy, or give `makePipe` its own seeded generator in the test copy.
-Scenery uses its own seeded generator (`seeded()` in background.js) for exactly this reason.
+Scenery uses its own seeded generator (`seeded()` in render/util.js) for exactly this reason.
 Keep new visual randomness off `Math.random` where you can.
 
 ## Screenshots and other checks
@@ -103,6 +106,9 @@ Keep new visual randomness off `Math.random` where you can.
 - **Phone width:** headless Chrome won't make a window narrower than about 500 px. Put the game
   in a 390×844 `<iframe>` on a wrapper page and screenshot that. Add
   `--force-device-scale-factor=3` for high DPI.
+- **Leaderboard:** to see the medallions and the update glow, make the stubbed `onValue` call
+  back with a few fake rows, then again ~3 s later with one score raised. Only that row should
+  glow. Screenshot about 0.3 s after the second call.
 - **Pause:** `document.hidden` can't be faked headless. Call `pause()` from `__pilot` at some
   step, then send a `pointerdown` to `#pause-screen` to resume.
 - **Performance:** `--virtual-time-budget` freezes `performance.now()` inside a frame, so

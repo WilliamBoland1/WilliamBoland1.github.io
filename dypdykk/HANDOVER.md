@@ -51,6 +51,10 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Split into modules** (CSS file + ES modules). | Easier to maintain, and the obstacle style can be swapped as one file. The page already needed HTTP because of Firebase. |
 | **Emoji medal hidden with CSS** (`#medal { display:none }`). `medal()` still runs. | The emoji didn't fit the heritage look. |
 | **Depth haze over bulkheads.** | Without it, bright steel looked pasted onto the dark stages. |
+| **ROV restyled as a toy bathyscaphe** (`?v=115`): round-nosed hull, brass band and hatch, raked skid-fins, a ducted thruster that hangs a little low, and a tail fin. | More personality than the plain capsule. It fills the same sprite box around the same hitbox, so what you see still matches what crashes. Bubbles now leave from the duct. |
+| **Kelp grows in clumps** in the seabed silhouettes: each plant gets one or two shorter sibling strands. | Single strands looked sparse. The siblings use their own seeded generator, so the main strands stay where they were. |
+| **Distant sea life** (`render/sealife.js`): a small school of fish, a lone cod and two jellyfish, drawn behind the far ridge. | Adds life to the water without competing with the obstacles: faint, softened, and fading with the surface light. In the dark stages only a faint cream rim on the jellyfish remains. |
+| **Leaderboard medallions and update flash.** The top three ranks sit on brass/silver/bronze medallions, a brass divider with a small porthole sits under the header, and a row glows when its score changes. | Done entirely from outside `scoreboard.js`: the medallions style its existing `gold`/`silver`/`bronze` classes, and `leaderboard-fx.js` watches `#lb-list` for redraws and marks the rows whose score changed. The first redraw after loading only records the scores. |
 
 ## Architecture
 
@@ -63,18 +67,21 @@ dypdykk/
   js/main.js                 state, step(), loop(), render(), collides(), flap(), gameOver(),
                              pause/resume, input, fitCanvas() (high-DPI sizing)
   js/scoreboard.js           Firebase: nameKey, submitScore, onValue → renderLB. DO NOT CHANGE.
-  js/render/util.js          pure helpers: makeSprite, drawBolt, colours, reducedMotion()
+  js/leaderboard-fx.js       watches #lb-list and marks rows whose score changed (.fresh) for the CSS flash
+  js/render/util.js          pure helpers: makeSprite, drawBolt, seeded() PRNG, colours, reducedMotion()
   js/render/obstacle.js      Obstacle.build(scale) / draw(ctx, pipe, x): crate, rope, containers
   js/render/rov.js           Rov.build(scale) / frame(ctx, bird, x, y, t, dt, state, lamp): ROV + bubbles
   js/render/background.js    Background.build / update / drawBack / drawFront / drawGround / lamp
+  js/render/sealife.js       SeaLife.build(scale) / draw(ctx, t, worldX, light): distant fish and jellyfish,
+                             called from Background (build, and drawBack)
 ```
 
 **Data flow.** `main.js` owns all game state. The render modules import only `config.js`,
 `constants.js` and `util.js`, and receive what they need as arguments. They must never write
 to game state. Keep it that way, because it is what makes visual changes safe.
 
-**Frame order** (`render()` in main.js): water gradient → seabed glow → light rays → far
-silhouettes → far snow → near silhouettes → obstacles (rope, crate, containers) → depth haze +
+**Frame order** (`render()` in main.js): water gradient → seabed glow → light rays → distant
+sea life → far silhouettes → far snow → near silhouettes → obstacles (rope, crate, containers) → depth haze +
 near snow → seabed strip → bubbles, headlamp, ROV.
 
 **Timing.**
@@ -96,8 +103,8 @@ near snow → seabed strip → bubbles, headlamp, ROV.
   canvas clears it.
 
 **Performance.**
-- The rope strip, crate, three container colours, ROV body, silhouettes and the seabed tile
-  are pre-rendered once per resize into offscreen canvases.
+- The rope strip, crate, three container colours, ROV body, silhouettes, the seabed tile and
+  the sea-life animation frames are pre-rendered once per resize into offscreen canvases.
 - Marine snow is drawn as one path per depth layer, and bubbles come from a fixed pool.
 - Measured about 0.4 ms per frame at a 990×1485 canvas, and about 2 ms (6.7 ms at worst)
   with 4× CPU throttle.
@@ -115,7 +122,7 @@ near snow → seabed strip → bubbles, headlamp, ROV.
 
 ## Common tasks
 
-- **Tweak colours, depth stages or particle counts:** edit [js/config.js](js/config.js).
+- **Tweak colours, depth stages, particle counts or the sea life:** edit [js/config.js](js/config.js).
   Page colours are the tokens at the top of [style.css](style.css).
 - **Restyle the obstacles:** write a new `render/obstacle.js` that exports `Obstacle` with the
   same `build(scale)` and `draw(ctx, pipe, x)`. The hitboxes are: `x-6` to `x+PW+6` from

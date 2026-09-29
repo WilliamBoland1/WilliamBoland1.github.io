@@ -1,6 +1,7 @@
 // Dypdykk 110: game state, fixed-step loop and input.
 // Game rules are unchanged from Flakse Fugl; the render/ modules only draw.
 import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE } from './constants.js';
+import './leaderboard-fx.js';                  // first, so it is watching before the leaderboard's first render
 import { submitScore } from './scoreboard.js';
 import { Background } from './render/background.js';
 import { Obstacle } from './render/obstacle.js';
