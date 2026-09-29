@@ -16,8 +16,9 @@ Firebase.
 
 - **Start:** a tap on the start screen, the button, Enter and Space all start a run once a
   name is typed. An empty name makes the input shake.
-- **Play:** the score goes up by 1 per obstacle. Touching the crate's bottom, a container's
-  roof, or the rope (flying too high) is a crash.
+- **Play:** the score goes up by 1 per obstacle. Touching the crate (bottle caps included), a
+  container's roof, or the centred rope (flying too high) is a crash. Flying above the crate
+  is allowed until the ROV reaches the rope.
 - **Depth:** the colours fade slowly at 10, 20 and 30, and return to light blue at 40.
 - **Crash:** "Kræsj!" appears, "Prøv igjen" and "Meny"
   work, and a new best shows up live in the Toppliste.
@@ -74,6 +75,14 @@ Build a throwaway **test copy** in a temp folder; never edit the real files:
 
 For reference, commit `4a248a6` gives:
 `{"score":5,"y":148.52,"vy":-5.42,"pipes":[[22,90.933],[313,253.2787]]}`
+(unchanged by the centred-rope hitbox in `?v=112`).
+
+**If you change a hitbox:** the step-600 dump only covers one autopilot path that stays in
+the gaps. Also copy `step()`, `makePipe()` and both versions of `collides()` into a Node
+script, play ~100 000 seeded runs with random and noisy-autopilot flaps under each version,
+and compare the final score of every run. For the centred rope (`?v=112`) all 100 000 scores
+matched. 1.6 % of runs crashed a few steps later (at the rope instead of the old column
+edge), and none crashed earlier.
 
 **Pitfall: pipe heights come from the shared `Math.random`.** Any code that calls
 `Math.random` before or between pipe spawns shifts the heights, even if the physics is

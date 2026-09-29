@@ -9,5 +9,9 @@ export const W = 360, H = 540;
 // JP flap velocity, PS pipe speed (px/step), PINT ms between pipes
 export const GH=55, PW=58, GAP=170, GR=0.44, JP=-8.5, PS=3, PINT=1600;
 
+// Upper obstacle hitbox: CRATE is the full-width crate box above the opening
+// (44 px body + 10 px bottle necks), ROPE the width of the rope centred above it.
+export const CRATE=54, ROPE=4;
+
 // Fixed simulation step: the game updates exactly 60 times per second on every display.
 export const STEP = 1000/60;

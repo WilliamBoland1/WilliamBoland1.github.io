@@ -26,11 +26,10 @@ export const CONFIG = {
     rise: 0.045                  // px/ms
   },
   obstacle: {
-    crateHeight: 44,             // beer crate above the opening (always full obstacle width)
+    // Crate height and rope width are the hitbox, so they live in constants.js (CRATE, ROPE).
     slingHeight: 18,             // sling from the crate's top corners up to the rope
     bottles: 5,                  // bottle necks showing above the crate rim
     crateFont: 'Fraunces, Georgia, serif',
-    ropeWidth: 4,                // rope along the obstacle's left edge
     containerHeight: 74,         // one container, door end (2.44 × 2.59 m at 70 px wide)
     containers: [                // stacked in turn; the starting colour varies per obstacle
       { base: '#8A4A32', light: '#B0694C', dark: '#5E2F1F' },   // rust red

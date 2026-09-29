@@ -44,7 +44,7 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Fixed 60 Hz timestep.** `step()` holds the original per-frame update, run exactly 60×/s. Pipe spawning counts steps (`(simStep-lastPipe)*STEP > PINT`) instead of real time. | The original ran physics once per display frame but spawned pipes on a real-time clock, so 120 Hz screens got double speed and double pipe spacing. That's unfair in a contest. On a 60 Hz screen the game plays as it did before. |
 | **The first pipe always appears 1.6 s into a run.** | It's a side effect of the fixed step. Before, starting from the menu after waiting more than 1.6 s spawned a pipe immediately, while retrying waited 1.6 s. Now every run starts the same way. |
 | **Obstacles: a beer crate on a rope above the gap, shipping containers below.** Replaced the steel bulkheads with a round brass collar, which read as a manhole and didn't work visually. | The crate's bottom and the top container's roof sit exactly on the gap edges, across the full 70 px width. Containers are stacked end-on from the gap down; the seabed covers the base of the lowest one. Their colour order comes from `topH`, not `Math.random` (see TESTING.md). |
-| **The rope runs down the left edge of the hitbox.** | The top hitbox is a solid 70 px column, but a rope is thin. The ROV never moves sideways and obstacles scroll toward it, so it always meets a column at its left edge first. A crash above the crate therefore always touches the rope, and the open water to the right of the rope can't be reached without hitting the rope or the crate. |
+| **Rope centred over the crate, and the top hitbox matches the drawing** (the only approved change to `collides()`). The top hitbox used to be a solid 70 px column with the rope drawn down its left edge. Now it's a full-width crate box (`CRATE` = 54 px: 44 px body + 10 px bottle necks) above the opening, plus a `ROPE` = 4 px column in the middle from the surface down to the crate. | Scores and survivable paths are unchanged. The new boxes lie inside the old column, so nothing that was safe became a crash. A ROV above the crate inside the column still can't get through: the crate blocks going down, the rope blocks going forward, and the ceiling kills going up. It just crashes a few steps later, at the rope. A pipe only scores once the ROV has passed it, so the later crash never adds a point. Checked by simulating 100 000 random runs with both hitboxes (see TESTING.md). |
 | **No tether on the ROV.** | The trailing tether made the ROV look like a sperm cell. The crash title changed from "Tauet røk!" to "Kræsj!" to match. |
 | **Scoreboard strings translated, logic untouched.** | Bokmål throughout. "Lagrer…", "Ny personlig rekord lagret!" and similar messages are in `gameOver()` in main.js; "Ingen poeng ennå" is in scoreboard.js. |
 | **Replaced `game.html` in place** rather than making a new page. | The URL stays the same. The old Flakse Fugl is in git history (for example `cec7869:game.html`). |
@@ -58,7 +58,7 @@ If a request conflicts with one of these rules, ask William before doing it.
 game.html                    markup only; links style.css and js/main.js with ?v=110
 dypdykk/
   style.css                  colour tokens (:root), brass frame, screens, leaderboard
-  js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP. DO NOT CHANGE.
+  js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE. DO NOT CHANGE.
   js/config.js               CONFIG: every visual value (colours, depth stages, particles…)
   js/main.js                 state, step(), loop(), render(), collides(), flap(), gameOver(),
                              pause/resume, input, fitCanvas() (high-DPI sizing)
@@ -118,9 +118,10 @@ near snow → seabed strip → bubbles, headlamp, ROV.
 - **Tweak colours, depth stages or particle counts:** edit [js/config.js](js/config.js).
   Page colours are the tokens at the top of [style.css](style.css).
 - **Restyle the obstacles:** write a new `render/obstacle.js` that exports `Obstacle` with the
-  same `build(scale)` and `draw(ctx, pipe, x)`. The hitbox is `x-6` to `x+PW+6`, solid above
-  `pipe.topH` and below `pipe.topH+GAP`. Anything the ROV can touch first must be drawn on that
-  box, which in practice means the left edge and the two gap edges.
+  same `build(scale)` and `draw(ctx, pipe, x)`. The hitboxes are: `x-6` to `x+PW+6` from
+  `pipe.topH-CRATE` to `pipe.topH` (crate) and below `pipe.topH+GAP` (containers), plus a
+  `ROPE`-wide column centred on the pipe from the top of the screen down to the crate. Draw on
+  those boxes, especially the gap edges, the crate top and the rope.
 - **Change text:** screens are in `game.html`, save messages in `gameOver()` in main.js, and
   the empty-leaderboard message is in scoreboard.js.
 - **Release:** commit, push, and bump `?v=110` on both links in `game.html`.

@@ -1,6 +1,6 @@
 // Dypdykk 110: game state, fixed-step loop and input.
 // Game rules are unchanged from Flakse Fugl; the render/ modules only draw.
-import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP } from './constants.js';
+import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE } from './constants.js';
 import { submitScore } from './scoreboard.js';
 import { Background } from './render/background.js';
 import { Obstacle } from './render/obstacle.js';
@@ -39,7 +39,10 @@ function buildSprites(){ Background.build(renderScale); Obstacle.build(renderSca
 function collides(b){
   if(b.y-12<=0||b.y+12>=H-GH) return true;
   for(const p of pipes){
-    if(b.x+14>p.x-6&&b.x-14<p.x+PW+6) if(b.y-10<p.topH||b.y+10>p.topH+GAP) return true;
+    if(b.x+14>p.x-6&&b.x-14<p.x+PW+6)                       // full width: crate and containers
+      if((b.y-10<p.topH&&b.y+10>p.topH-CRATE)||b.y+10>p.topH+GAP) return true;
+    const rx=p.x+PW/2-ROPE/2;                               // rope, centred, from the surface to the crate
+    if(b.x+14>rx&&b.x-14<rx+ROPE&&b.y-10<p.topH-CRATE) return true;
   }
   return false;
 }

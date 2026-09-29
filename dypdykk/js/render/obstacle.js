@@ -3,23 +3,24 @@
 // and shipping containers stacked end-on below it.
 // Swap this file to restyle the obstacles; any replacement must export
 // an `Obstacle` with the same build(scale) / draw(ctx, pipe, x) shape.
-// It only draws: the collision box stays in collides() (main.js).
-// Collision box: x-6 … x+PW+6, solid above topH and below topH+GAP.
-//  - The crate's bottom and the top container's roof sit exactly on the
-//    opening, across the full width.
-//  - The rope runs down the LEFT edge of the box. The ROV never moves
-//    sideways, so it always meets a column at its left edge first: a crash
-//    above the crate always touches the rope, and the open water to the
-//    right of the rope can't be reached without hitting rope or crate.
+// It only draws: the collision boxes stay in collides() (main.js), and the
+// drawing must sit on them:
+//  - Crate: x-6 … x+PW+6, from topH-CRATE (bottle caps) down to topH. Its
+//    bottom edge is the top of the opening.
+//  - Rope: ROPE px wide, centred on the obstacle, from the surface down to
+//    the crate box.
+//  - Containers: x-6 … x+PW+6, below topH+GAP; the top container's roof is
+//    the bottom of the opening.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
-import { H, GH, PW, GAP } from '../constants.js';
+import { H, GH, PW, GAP, CRATE, ROPE } from '../constants.js';
 import { TAU, makeSprite, roundRectPath, drawBolt } from './util.js';
 
 export const Obstacle = (() => {
   const O = CONFIG.obstacle, C = CONFIG.colors;
   const SW = PW + 12;                              // drawn width == collision width
-  const CH = O.crateHeight, SL = O.slingHeight, RW = O.ropeWidth, KH = O.containerHeight;
+  const NECK = 10;                                 // bottle necks above the rim, part of the CRATE box
+  const CH = CRATE - NECK, SL = O.slingHeight, RW = ROPE, KH = O.containerHeight;
   let rope, crate, containers = [], scale = 1;
 
   // One tall strip of twisted rope. Each obstacle slices the length it needs.
@@ -37,7 +38,7 @@ export const Obstacle = (() => {
   }
 
   // Crate seen from the side, bottle necks sticking out of the top, and a
-  // two-leg sling up to a shackle at the top-left where the rope ties on.
+  // two-leg sling up to a shackle at the top centre where the rope ties on.
   // Sprite origin: top of the sling. The crate body fills SL … SL+CH.
   function buildCrate() {
     const { c, g } = makeSprite(SW, SL + CH, scale);
@@ -86,12 +87,13 @@ export const Obstacle = (() => {
     g.fillStyle = C.crateDark; g.fillText('110', SW / 2, ty);
 
     // sling: two legs from the shackle to the crate's top corners
-    const sx = RW / 2, sy = 3;
-    g.strokeStyle = C.ropeDark; g.lineWidth = 1.6; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(sx, sy); g.lineTo(2.5, top + 1);
-    g.moveTo(sx, sy); g.lineTo(SW - 2.5, top + 1); g.stroke();
-    g.strokeStyle = C.rope; g.lineWidth = 0.8;
-    g.beginPath(); g.moveTo(sx, sy); g.lineTo(SW - 2.5, top + 1); g.stroke();
+    const sx = SW / 2, sy = 3;
+    g.lineCap = 'round';
+    for (const [w, col] of [[1.6, C.ropeDark], [0.8, C.rope]]) {
+      g.strokeStyle = col; g.lineWidth = w;
+      g.beginPath(); g.moveTo(sx, sy); g.lineTo(2.5, top + 1);
+      g.moveTo(sx, sy); g.lineTo(SW - 2.5, top + 1); g.stroke();
+    }
     drawBolt(g, sx, sy, 2.4, C.brassDark, C.brassLight);
     return c;
   }
@@ -138,9 +140,9 @@ export const Obstacle = (() => {
   function draw(g, p, x) {
     const gx = x - 6, top = p.topH, bot = p.topH + GAP, floor = H - GH;
 
-    // 1. Rope from the surface down to the shackle, on the column's left edge.
+    // 1. Rope from the surface down to the shackle, centred over the crate.
     const crateY = top - CH - SL, ropeLen = crateY + 3;
-    if (ropeLen > 0) g.drawImage(rope, 0, 0, RW * scale, ropeLen * scale, gx, 0, RW, ropeLen);
+    if (ropeLen > 0) g.drawImage(rope, 0, 0, RW * scale, ropeLen * scale, gx + SW / 2 - RW / 2, 0, RW, ropeLen);
     // 2. Crate: its bottom edge is the top of the opening.
     g.drawImage(crate, gx, crateY, SW, SL + CH);
 
