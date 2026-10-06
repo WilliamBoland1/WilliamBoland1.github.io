@@ -56,7 +56,7 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Kelp grows in clumps** in the seabed silhouettes: each plant gets one or two shorter sibling strands. | Single strands looked sparse. The siblings use their own seeded generator, so the main strands stay where they were. |
 | **Distant sea life** (`render/sealife.js`): a small school of fish, a lone cod and two jellyfish, drawn behind the far ridge. | Adds life to the water without competing with the obstacles: faint, softened, and fading with the surface light. In the dark stages only a faint cream rim on the jellyfish remains. |
 | **Leaderboard medallions and update flash.** The top three ranks sit on brass/silver/bronze medallions, a brass divider with a small porthole sits under the header, and a row glows when its score changes. | Done entirely from outside `scoreboard.js`: the medallions style its existing `gold`/`silver`/`bronze` classes, and `leaderboard-fx.js` watches `#lb-list` for redraws and marks the rows whose score changed. The first redraw after loading only records the scores. |
-| **Jubilee side banners and a sponsor block** (`?v=117`). On screens at least 1240 px wide, a banner in a thinner brass frame with corner bolts sits at each end of the row, exactly as tall as the game frame, with the navy page showing around it. The leaderboard and a sponsor card now share a right column (`#sidebar`) that is exactly as tall as the frame. | Ad space for the jubilee and the sponsors, in the style of game portals' side ads. Image files are allowed here because they sit outside the game (rule 4). A banner keeps the artwork's 1:2 shape when there is room and gets slimmer on narrower screens, where `object-fit: cover` crops its sides; hence the safe zone below. Logos sit on cream plates so any logo colour reads on navy. HTML and CSS only: no JS changed, and the step-600 dump is identical. |
+| **Jubilee side banners and a sponsor block** (`?v=117`). On screens at least 1240 px wide, a borderless banner card with rounded corners and a drop shadow, like the leaderboard card, sits at each end of the row. It is exactly as tall as the game frame, and the navy page shows around it. The leaderboard and a sponsor card now share a right column (`#sidebar`) that is exactly as tall as the frame. | Ad space for the jubilee and the sponsors, in the style of game portals' side ads. Image files are allowed here because they sit outside the game (rule 4). A banner keeps the artwork's 1:2 shape when there is room and gets slimmer on narrower screens, where `object-fit: cover` crops its sides; hence the safe zone below. Logos sit on cream plates so any logo colour reads on navy. HTML and CSS only: no JS changed, and the step-600 dump is identical. |
 
 ## Architecture
 
@@ -143,12 +143,13 @@ near snow → seabed strip → bubbles, headlamp, ROV.
     jubilee Facebook page. Change the `href` on the `.side-ad` links in `game.html` to match a new
     banner. They open in a new tab, and switching tabs pauses a running game.
   - Update the `alt` text to describe the banner.
-- **Add a sponsor:** put the SVG in `sponsors/`, then replace a placeholder plate in
+- **Add a sponsor:** put the logo in `sponsors/` (SVG, or a PNG with a transparent background
+  like `hoegh-autoliners.png`), then replace a placeholder plate in
   `game.html` with
   `<a class="sp-plate" href="https://…" target="_blank" rel="noopener"><img src="dypdykk/sponsors/navn.svg" alt="Navn"/></a>`.
   - The main sponsor keeps `class="sp-plate main"`, which is full width and taller.
-  - Plates are cream, so the logo keeps its own colours. Trim empty margins from the SVG's
-    `viewBox`, or the logo looks small.
+  - Plates are cream, so the logo keeps its own colours. Trim empty margins from the logo (for an SVG,
+    its `viewBox`), or the logo looks small.
   - Up to four small plates fit without squeezing the leaderboard. More plates still work,
     but the leaderboard list then scrolls sooner.
 - **Change text:** screens are in `game.html`, save messages in `gameOver()` in main.js, and
