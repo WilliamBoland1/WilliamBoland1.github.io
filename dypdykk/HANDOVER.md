@@ -29,8 +29,10 @@ These came from the original brief. They exist because the game is used for scor
    original Firebase code, moved without edits. The only change is the translated "no scores
    yet" message.
 3. **No new gameplay features:** no power-ups, collectibles, levels, or history/timeline content.
-4. **No image files.** Everything is drawn with canvas paths and gradients, or inline SVG.
-   (The beer crate was considered as a PNG and kept in canvas on purpose.)
+4. **No image files in the game.** Everything inside the frame is drawn with canvas paths and
+   gradients, or inline SVG. (The beer crate was considered as a PNG and kept in canvas on purpose.)
+   The one approved exception is page-level content outside the frame: the jubilee side banners
+   (`ads/`) and the sponsor logos (`sponsors/`).
 5. **Calm heritage look:** navy, cream and brass colours, Fraunces for titles, JetBrains Mono
    for numbers and labels. No neon and no arcade look.
 6. **All player-facing text is in Norwegian bokmål.**
@@ -54,13 +56,16 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Kelp grows in clumps** in the seabed silhouettes: each plant gets one or two shorter sibling strands. | Single strands looked sparse. The siblings use their own seeded generator, so the main strands stay where they were. |
 | **Distant sea life** (`render/sealife.js`): a small school of fish, a lone cod and two jellyfish, drawn behind the far ridge. | Adds life to the water without competing with the obstacles: faint, softened, and fading with the surface light. In the dark stages only a faint cream rim on the jellyfish remains. |
 | **Leaderboard medallions and update flash.** The top three ranks sit on brass/silver/bronze medallions, a brass divider with a small porthole sits under the header, and a row glows when its score changes. | Done entirely from outside `scoreboard.js`: the medallions style its existing `gold`/`silver`/`bronze` classes, and `leaderboard-fx.js` watches `#lb-list` for redraws and marks the rows whose score changed. The first redraw after loading only records the scores. |
+| **Jubilee side banners and a sponsor block** (`?v=117`). On screens at least 1240 px wide, a banner in a thinner brass frame with corner bolts sits at each end of the row, exactly as tall as the game frame, with the navy page showing around it. The leaderboard and a sponsor card now share a right column (`#sidebar`) that is exactly as tall as the frame. | Ad space for the jubilee and the sponsors, in the style of game portals' side ads. Image files are allowed here because they sit outside the game (rule 4). A banner keeps the artwork's 1:2 shape when there is room and gets slimmer on narrower screens, where `object-fit: cover` crops its sides; hence the safe zone below. Logos sit on cream plates so any logo colour reads on navy. HTML and CSS only: no JS changed, and the step-600 dump is identical. |
 
 ## Architecture
 
 ```
 game.html                    markup only; links style.css and js/main.js with ?v=110
 dypdykk/
-  style.css                  colour tokens (:root), brass frame, screens, leaderboard
+  style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, sponsors
+  ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners; placeholder shows while missing)
+  sponsors/                  sponsor logos (SVG), referenced from #sponsors in game.html
   js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE. DO NOT CHANGE.
   js/config.js               CONFIG: every visual value (colours, depth stages, particles…)
   js/main.js                 state, step(), loop(), render(), collides(), flap(), gameOver(),
@@ -128,6 +133,24 @@ near snow → seabed strip → bubbles, headlamp, ROV.
   `pipe.topH-CRATE` to `pipe.topH` (crate) and below `pipe.topH+GAP` (containers), plus a
   `ROPE`-wide column centred on the pipe from the top of the screen down to the crate. Draw on
   those boxes, especially the gap edges, the crate top and the rope.
+- **Swap a side banner:** save it as `ads/banner-venstre.jpg` or `ads/banner-hoyre.jpg`; no code
+  change is needed.
+  - Make it a JPG at 1000 × 2000 px, quality about 80, under about 300 KB.
+  - The full height always shows. The full width shows on wide screens (about 1700 px and up),
+    but laptops around 1440 px wide crop the sides to about 1:2.8, and 1280×720 to about 1:3.
+    **Keep text and logos inside the central 640 px of width.**
+  - Each banner links to its own page: the left one to the volunteer sign-up, the right one to the
+    jubilee Facebook page. Change the `href` on the `.side-ad` links in `game.html` to match a new
+    banner. They open in a new tab, and switching tabs pauses a running game.
+  - Update the `alt` text to describe the banner.
+- **Add a sponsor:** put the SVG in `sponsors/`, then replace a placeholder plate in
+  `game.html` with
+  `<a class="sp-plate" href="https://…" target="_blank" rel="noopener"><img src="dypdykk/sponsors/navn.svg" alt="Navn"/></a>`.
+  - The main sponsor keeps `class="sp-plate main"`, which is full width and taller.
+  - Plates are cream, so the logo keeps its own colours. Trim empty margins from the SVG's
+    `viewBox`, or the logo looks small.
+  - Up to four small plates fit without squeezing the leaderboard. More plates still work,
+    but the leaderboard list then scrolls sooner.
 - **Change text:** screens are in `game.html`, save messages in `gameOver()` in main.js, and
   the empty-leaderboard message is in scoreboard.js.
 - **Release:** commit, push, and bump `?v=110` on both links in `game.html`.
