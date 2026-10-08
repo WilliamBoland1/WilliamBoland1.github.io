@@ -20,6 +20,8 @@ Firebase.
 - **Play:** the score goes up by 1 per obstacle. Touching the crate (bottle caps included), a
   container's roof, or the centred rope (flying too high) is a crash. Flying above the crate
   is allowed until the ROV reaches the rope.
+- **Difficulty step:** shortly after the colour change at 20, the openings get narrower
+  (155 px instead of 170). Obstacles already on screen at 20 keep the wide gap.
 - **Depth:** the colours fade slowly at 10, 20 and 30, and return to light blue at 40.
 - **Crash:** "Kræsj!" appears, "Prøv igjen" and "Meny"
   work, and a new best shows up live in the Toppliste, where its row glows brass twice.
@@ -66,7 +68,7 @@ Build a throwaway **test copy** in a temp folder; never edit the real files:
      // Deterministic autopilot: decides inside step(), so the result doesn't depend on frame timing.
      function __pilot(){
        if(simStep===600) document.title=JSON.stringify({score,y:+bird.y.toFixed(4),vy:+bird.vy.toFixed(4),pipes:pipes.map(p=>[p.x,+p.topH.toFixed(4)])});
-       const p=pipes.find(p=>p.x+PW+6>bird.x-14); const target=p?p.topH+GAP/2+15:H/2;
+       const p=pipes.find(p=>p.x+PW+6>bird.x-14); const target=p?p.topH+p.gap/2+15:H/2;
        if(bird.y>target&&bird.vy>0) flap();
      }
      document.getElementById('player-name').value='Test'; flap();
@@ -89,6 +91,12 @@ script, play ~100 000 seeded runs with random and noisy-autopilot flaps under ea
 and compare the final score of every run. For the centred rope (`?v=112`) all 100 000 scores
 matched. 1.6 % of runs crashed a few steps later (at the rope instead of the old column
 edge), and none crashed earlier.
+
+**The difficulty step at 20** is out of reach of the step-600 dump (score 5). To check it, start
+the test copy at 19 in `__pilot` (`if(simStep===lastPipe+1&&score===0){score=19;updScore(score);}`),
+log `[score, p.gap]` the first time each pipe appears, and run for about 45 s of virtual time.
+Pipes that appear at 19 must have gap 170, and every pipe after that 155. In `?v=119` the pilot above
+cleared 27 narrow gaps (score 19 → 46) without crashing.
 
 **Pitfall: pipe heights come from the shared `Math.random`.** Any code that calls
 `Math.random` before or between pipe spawns shifts the heights, even if the physics is

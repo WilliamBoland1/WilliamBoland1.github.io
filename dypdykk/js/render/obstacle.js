@@ -9,11 +9,11 @@
 //    bottom edge is the top of the opening.
 //  - Rope: ROPE px wide, centred on the obstacle, from the surface down to
 //    the crate box.
-//  - Containers: x-6 … x+PW+6, below topH+GAP; the top container's roof is
-//    the bottom of the opening.
+//  - Containers: x-6 … x+PW+6, below topH+gap (the pipe's own gap: GAP, or
+//    HARD_GAP from HARD_AT); the top container's roof is the bottom of the opening.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
-import { H, GH, PW, GAP, CRATE, ROPE } from '../constants.js';
+import { H, GH, PW, CRATE, ROPE } from '../constants.js';
 import { TAU, makeSprite, roundRectPath, drawBolt } from './util.js';
 
 export const Obstacle = (() => {
@@ -205,7 +205,7 @@ export const Obstacle = (() => {
 
   // g: context, p: pipe, x: pipe x to draw at (may be interpolated between steps)
   function draw(g, p, x) {
-    const gx = x - 6, top = p.topH, bot = p.topH + GAP, floor = H - GH;
+    const gx = x - 6, top = p.topH, bot = p.topH + p.gap, floor = H - GH;
 
     // 1. Rope from the surface down to the shackle, centred over the crate.
     const crateY = top - CH - SL, ropeLen = crateY + 3;

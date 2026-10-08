@@ -1,6 +1,7 @@
 // Dypdykk 110: game state, fixed-step loop and input.
-// Game rules are unchanged from Flakse Fugl; the render/ modules only draw.
-import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE } from './constants.js';
+// Game rules are unchanged from Flakse Fugl, except the narrower gap from
+// HARD_AT (see constants.js); the render/ modules only draw.
+import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, HARD_AT, HARD_GAP } from './constants.js';
 import './leaderboard-fx.js';                  // first, so it is watching before the leaderboard's first render
 import { submitScore } from './scoreboard.js';
 import { Background } from './render/background.js';
@@ -16,7 +17,8 @@ let bird, pipes, lastPipe, lastTime, playerName='';
 
 function makeBird(){ return {x:90,y:H/2-30,vy:0,angle:0,flap:0}; }
 
-function makePipe(x){ return {x, topH:Math.random()*(H-GH-GAP-120)+70, scored:false}; }
+// The gap is fixed when the pipe spawns off-screen, so it never shrinks in view.
+function makePipe(x){ const gap=score>=HARD_AT?HARD_GAP:GAP; return {x, gap, topH:Math.random()*(H-GH-gap-120)+70, scored:false}; }
 
 // ── Canvas sizing ──
 // CSS decides how big the canvas is on screen. The backing store matches that
@@ -41,7 +43,7 @@ function collides(b){
   if(b.y-12<=0||b.y+12>=H-GH) return true;
   for(const p of pipes){
     if(b.x+14>p.x-6&&b.x-14<p.x+PW+6)                       // full width: crate and containers
-      if((b.y-10<p.topH&&b.y+10>p.topH-CRATE)||b.y+10>p.topH+GAP) return true;
+      if((b.y-10<p.topH&&b.y+10>p.topH-CRATE)||b.y+10>p.topH+p.gap) return true;
     const rx=p.x+PW/2-ROPE/2;                               // rope, centred, from the surface to the crate
     if(b.x+14>rx&&b.x-14<rx+ROPE&&b.y-10<p.topH-CRATE) return true;
   }

@@ -24,7 +24,9 @@ These came from the original brief. They exist because the game is used for scor
 1. **Gameplay never changes.** Gravity, flap strength, speed, gap size, pipe spacing, the
    hitbox and scoring must stay exactly as they are. All of them live in
    [js/constants.js](js/constants.js), in `collides()` and `step()` in
-   [js/main.js](js/main.js), and in `makePipe()`. Nothing gets harder or easier during a run.
+   [js/main.js](js/main.js), and in `makePipe()`. The one approved exception: obstacles that
+   spawn once the score reaches `HARD_AT` (20) get the narrower `HARD_GAP` (155 px instead of
+   170). Nothing else gets harder or easier during a run.
 2. **The scoreboard code is not modified.** [js/scoreboard.js](js/scoreboard.js) is the
    original Firebase code, moved without edits. The only change is the translated "no scores
    yet" message.
@@ -59,6 +61,7 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Jubilee side banners and a sponsor block** (`?v=117`). On screens at least 1240 px wide, a borderless banner card with rounded corners and a drop shadow, like the leaderboard card, sits at each end of the row. It is exactly as tall as the game frame, and the navy page shows around it. The leaderboard and a sponsor card now share a right column (`#sidebar`) that is exactly as tall as the frame. | Ad space for the jubilee and the sponsors, in the style of game portals' side ads. Image files are allowed here because they sit outside the game (rule 4). A banner keeps the artwork's 1:2 shape when there is room and gets slimmer on narrower screens, where `object-fit: cover` crops its sides; hence the safe zone below. Logos sit on cream plates so any logo colour reads on navy. HTML and CSS only: no JS changed, and the step-600 dump is identical. |
 | **Phone, tablet and landscape fit** (`?v=118`, CSS only). The game height uses `100svh`, so it doesn't resize when the browser toolbar hides. The right column stacks under the game below 840 px (side by side needs 834 px; iPads in portrait used to get a 250 px wide, frame-tall column). Phones up to 460 px wide and screens under 500 px tall get the slim frame and a 10 px gutter. Short screens also hide the emblem and tighten the overlay screens. The name field is 16 px, and the page has `touch-action: manipulation`. | Safari zooms into inputs under 16 px and stays zoomed, and fast taps beside the game could double-tap zoom. Landscape phones give a game about 190 px wide: it stays usable, with no "rotate" hint by choice. |
 | **Full names for the contest** (`?v=118`). A short rule under the name field (`#name-hint`): "Bruk fullt navn for å delta i konkurransen. Ett navn, én poengsum: din beste lagres." It brightens while the field has focus. The field takes 24 characters (was 16), the placeholder reads "Fullt navn…" and `autocomplete="name"` lets phones suggest the player's full name. Space in the field now types a space (one guard in the `keydown` listener in main.js, idle state only). | `scores/` keeps one record per name, so two players called "Ola" would share one score. `scoreboard.js` is unchanged: `nameKey()` turns spaces into `_` and keeps 20 characters, so names that match in their first 20 characters still share a record. |
+| **Difficulty step at 20** (`?v=119`). Obstacles spawned once the score is 20 or more have a 155 px gap instead of 170 (`HARD_AT`, `HARD_GAP` in constants.js). `makePipe()` stores the gap on the pipe (`p.gap`), and `collides()` and `obstacle.js` read it from there. The `topH` range uses the same gap, so the top and bottom margins stay the same. | A small step up for good players. 20 is also the second depth-colour change, so the darker water signals it and no extra UI is needed. The gap is fixed when an obstacle spawns off-screen, so the 1–2 obstacles already in view when the score reaches 20 keep the wide gap. Below 20 nothing changed: same arithmetic, same `Math.random` calls, identical step-600 dump. Scores above about 20 from before `?v=119` are from an easier game, so release it at a weekly reset (clear `scores/` on Monday). |
 
 ## Architecture
 
@@ -68,7 +71,7 @@ dypdykk/
   style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, sponsors
   ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners)
   sponsors/                  sponsor logos (SVG), referenced from #sponsors in game.html
-  js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE. DO NOT CHANGE.
+  js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, HARD_AT, HARD_GAP. DO NOT CHANGE.
   js/config.js               CONFIG: every visual value (colours, depth stages, particles…)
   js/main.js                 state, step(), loop(), render(), collides(), flap(), gameOver(),
                              pause/resume, input, fitCanvas() (high-DPI sizing)
@@ -133,7 +136,7 @@ near snow → seabed strip → bubbles, headlamp, ROV.
   Page colours are the tokens at the top of [style.css](style.css).
 - **Restyle the obstacles:** write a new `render/obstacle.js` that exports `Obstacle` with the
   same `build(scale)` and `draw(ctx, pipe, x)`. The hitboxes are: `x-6` to `x+PW+6` from
-  `pipe.topH-CRATE` to `pipe.topH` (crate) and below `pipe.topH+GAP` (containers), plus a
+  `pipe.topH-CRATE` to `pipe.topH` (crate) and below `pipe.topH+pipe.gap` (containers), plus a
   `ROPE`-wide column centred on the pipe from the top of the screen down to the crate. Draw on
   those boxes, especially the gap edges, the crate top and the rope.
 - **Swap a side banner:** save it as `ads/banner-venstre.jpg` or `ads/banner-hoyre.jpg`; no code
