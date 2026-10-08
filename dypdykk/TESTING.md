@@ -15,7 +15,8 @@ The page must be served over HTTP; opening the file directly breaks the ES modul
 Firebase.
 
 - **Start:** a tap on the start screen, the button, Enter and Space all start a run once a
-  name is typed. An empty name makes the input shake.
+  name is typed. Space inside the name field types a space ("Ola Nordmann") and doesn't start.
+  An empty name makes the input shake.
 - **Play:** the score goes up by 1 per obstacle. Touching the crate (bottle caps included), a
   container's roof, or the centred rope (flying too high) is a crash. Flying above the crate
   is allowed until the ROV reaches the rope.
@@ -25,7 +26,9 @@ Firebase.
   The top three ranks sit on brass, silver and bronze medallions.
 - **Pause:** switching tabs in the middle of a run shows "Pause"; a tap or Space continues.
 - **DevTools:**
-  - Device toolbar at phone width: the frame fits and the leaderboard sits below.
+  - Device toolbar at phone width: the frame fits and the leaderboard sits below. Also iPad
+    portrait (768, 820): leaderboard below at frame width. Phone landscape (844×390, 667×375):
+    no emblem, and the start button, "Prøv igjen" and "Meny" are fully visible.
   - Rendering → "prefers-reduced-motion: reduce": fewer snow specks, the rays stop swaying,
     the distant fish and jellyfish stop wiggling and pulsing, and the leaderboard glow is a
     single fade.

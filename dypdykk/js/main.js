@@ -171,7 +171,10 @@ function press(){
   flap();
 }
 
-document.addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();press();} });
+document.addEventListener('keydown',e=>{
+  if(state==='idle' && e.target.id==='player-name' && e.code==='Space') return;   // full names need spaces; Enter starts
+  if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();press();}
+});
 canvas.addEventListener('pointerdown',e=>{ e.preventDefault(); press(); });
 // Start screen: a tap anywhere except the name field or a button starts the dive.
 document.getElementById('start-screen').addEventListener('pointerdown',e=>{

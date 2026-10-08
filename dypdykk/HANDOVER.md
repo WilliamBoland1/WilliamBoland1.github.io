@@ -57,6 +57,8 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Distant sea life** (`render/sealife.js`): a small school of fish, a lone cod and two jellyfish, drawn behind the far ridge. | Adds life to the water without competing with the obstacles: faint, softened, and fading with the surface light. In the dark stages only a faint cream rim on the jellyfish remains. |
 | **Leaderboard medallions and update flash.** The top three ranks sit on brass/silver/bronze medallions, a brass divider with a small porthole sits under the header, and a row glows when its score changes. | Done entirely from outside `scoreboard.js`: the medallions style its existing `gold`/`silver`/`bronze` classes, and `leaderboard-fx.js` watches `#lb-list` for redraws and marks the rows whose score changed. The first redraw after loading only records the scores. |
 | **Jubilee side banners and a sponsor block** (`?v=117`). On screens at least 1240 px wide, a borderless banner card with rounded corners and a drop shadow, like the leaderboard card, sits at each end of the row. It is exactly as tall as the game frame, and the navy page shows around it. The leaderboard and a sponsor card now share a right column (`#sidebar`) that is exactly as tall as the frame. | Ad space for the jubilee and the sponsors, in the style of game portals' side ads. Image files are allowed here because they sit outside the game (rule 4). A banner keeps the artwork's 1:2 shape when there is room and gets slimmer on narrower screens, where `object-fit: cover` crops its sides; hence the safe zone below. Logos sit on cream plates so any logo colour reads on navy. HTML and CSS only: no JS changed, and the step-600 dump is identical. |
+| **Phone, tablet and landscape fit** (`?v=118`, CSS only). The game height uses `100svh`, so it doesn't resize when the browser toolbar hides. The right column stacks under the game below 840 px (side by side needs 834 px; iPads in portrait used to get a 250 px wide, frame-tall column). Phones up to 460 px wide and screens under 500 px tall get the slim frame and a 10 px gutter. Short screens also hide the emblem and tighten the overlay screens. The name field is 16 px, and the page has `touch-action: manipulation`. | Safari zooms into inputs under 16 px and stays zoomed, and fast taps beside the game could double-tap zoom. Landscape phones give a game about 190 px wide: it stays usable, with no "rotate" hint by choice. |
+| **Full names for the contest** (`?v=118`). A short rule under the name field (`#name-hint`): "Bruk fullt navn for å delta i konkurransen. Ett navn, én poengsum: din beste lagres." It brightens while the field has focus. The field takes 24 characters (was 16), the placeholder reads "Fullt navn…" and `autocomplete="name"` lets phones suggest the player's full name. Space in the field now types a space (one guard in the `keydown` listener in main.js, idle state only). | `scores/` keeps one record per name, so two players called "Ola" would share one score. `scoreboard.js` is unchanged: `nameKey()` turns spaces into `_` and keeps 20 characters, so names that match in their first 20 characters still share a record. |
 
 ## Architecture
 
@@ -64,7 +66,7 @@ If a request conflicts with one of these rules, ask William before doing it.
 game.html                    markup only; links style.css and js/main.js with ?v=110
 dypdykk/
   style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, sponsors
-  ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners; placeholder shows while missing)
+  ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners)
   sponsors/                  sponsor logos (SVG), referenced from #sponsors in game.html
   js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE. DO NOT CHANGE.
   js/config.js               CONFIG: every visual value (colours, depth stages, particles…)
@@ -121,8 +123,9 @@ near snow → seabed strip → bubbles, headlamp, ROV.
 - On the start screen, the start button, Enter, and tapping anywhere except the input or
   buttons all go through the original `flap()` start path.
 - An empty name shakes the input.
-- Space typed into the name field starts the game, as it did in the original, so names can't
-  contain spaces.
+- Space typed into the name field types a space, so full names work; Enter starts. (In the
+  original, Space there started the game, so names couldn't contain spaces.) Space anywhere
+  else on the start screen still starts.
 
 ## Common tasks
 
@@ -144,10 +147,9 @@ near snow → seabed strip → bubbles, headlamp, ROV.
     banner. They open in a new tab, and switching tabs pauses a running game.
   - Update the `alt` text to describe the banner.
 - **Add a sponsor:** put the logo in `sponsors/` (SVG, or a PNG with a transparent background
-  like `hoegh-autoliners.png`), then replace a placeholder plate in
-  `game.html` with
+  like `hoegh-autoliners.png`), then add a plate to `.sp-grid` in `game.html`:
   `<a class="sp-plate" href="https://…" target="_blank" rel="noopener"><img src="dypdykk/sponsors/navn.svg" alt="Navn"/></a>`.
-  - The main sponsor keeps `class="sp-plate main"`, which is full width and taller.
+  - A main sponsor gets `class="sp-plate main"` and goes first: full width and taller.
   - Plates are cream, so the logo keeps its own colours. Trim empty margins from the logo (for an SVG,
     its `viewBox`), or the logo looks small.
   - Up to four small plates fit without squeezing the leaderboard. More plates still work,

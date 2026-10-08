@@ -9,16 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <!-- Bump ?v= on each release so browsers don't mix old and new files -->
-  <link rel="stylesheet" href="dypdykk/style.css?v=117"/>
+  <link rel="stylesheet" href="dypdykk/style.css?v=118"/>
 </head>
 <body>
 <div id="layout">
-  <!-- Jubilee banners on either side, as tall as the game frame; wide screens only.
-       Images are dypdykk/ads/banner-venstre.jpg and banner-hoyre.jpg (1000×2000, see HANDOVER.md);
-       the placeholder shows if one is missing. Left: volunteer sign-up, right: the jubilee Facebook page. -->
-  <a class="side-ad left" href="https://mannhullet.no/jubileum/frivillig.html" target="_blank" rel="noopener">
-    <span class="ad-ph">Jubileumsbanner<br/>1000 × 2000 JPG</span>
-    <img src="dypdykk/ads/banner-venstre.jpg" alt="Har du søkt funk? Bli frivillig på Mannhullets 110-årsjubileum" loading="lazy" onerror="this.remove()"/>
+  <!-- Jubilee side banners, wide screens only: see HANDOVER.md "Swap a side banner" -->
+  <a class="side-ad" href="https://mannhullet.no/jubileum/frivillig.html" target="_blank" rel="noopener">
+    <img src="dypdykk/ads/banner-venstre.jpg" alt="Har du søkt funk? Bli frivillig på Mannhullets 110-årsjubileum" loading="lazy"/>
   </a>
 
   <!-- Brass porthole frame around the game -->
@@ -46,7 +43,9 @@
           </svg>
           <div class="screen-title">Dypdykk <span class="num">110</span></div>
           <div class="screen-sub">Mannhullet 110 år</div>
-          <input class="name-input" id="player-name" type="text" maxlength="16" placeholder="Navnet ditt…" autocomplete="nickname"/>
+          <input class="name-input" id="player-name" type="text" maxlength="24" placeholder="Fullt navn…" autocomplete="name" aria-describedby="name-hint"/>
+          <!-- Contest rule: one leaderboard record per name, only its best score is kept (scoreboard.js) -->
+          <div class="name-hint" id="name-hint"><strong>Bruk fullt navn</strong> for å delta i konkurransen. Ett navn, én poengsum: din beste lagres.</div>
           <button class="btn" id="start-btn">Start dykket</button>
           <div class="tip">Trykk eller press mellomrom for å svømme</div>
         </div>
@@ -82,13 +81,13 @@
       <!-- brass divider with a small porthole in the middle -->
       <div class="lb-ornament" aria-hidden="true">
         <span class="lb-ornament-line"></span>
-        <svg viewBox="0 0 16 16">
+        <svg viewBox="0 0 16 16"><g id="orn">
           <circle class="orn-ring" cx="8" cy="8" r="5.2"/>
           <g class="orn-bolts">
             <circle cx="8" cy="2.8" r="0.8"/><circle cx="13.2" cy="8" r="0.8"/>
             <circle cx="8" cy="13.2" r="0.8"/><circle cx="2.8" cy="8" r="0.8"/>
           </g>
-        </svg>
+        </g></svg>
         <span class="lb-ornament-line"></span>
       </div>
       <div id="lb-list"><div class="lb-empty">Laster…</div></div>
@@ -99,34 +98,21 @@
       <div id="sp-title">Sponsorer</div>
       <div class="lb-ornament" aria-hidden="true">
         <span class="lb-ornament-line"></span>
-        <svg viewBox="0 0 16 16">
-          <circle class="orn-ring" cx="8" cy="8" r="5.2"/>
-          <g class="orn-bolts">
-            <circle cx="8" cy="2.8" r="0.8"/><circle cx="13.2" cy="8" r="0.8"/>
-            <circle cx="8" cy="13.2" r="0.8"/><circle cx="2.8" cy="8" r="0.8"/>
-          </g>
-        </svg>
+        <svg viewBox="0 0 16 16"><use href="#orn"/></svg>
         <span class="lb-ornament-line"></span>
       </div>
-      <!-- Replace a placeholder plate with a logo (see HANDOVER.md):
-           <a class="sp-plate" href="https://…" target="_blank" rel="noopener"><img src="dypdykk/sponsors/navn.svg" alt="Navn"/></a>
-           The main sponsor keeps class="sp-plate main". -->
+      <!-- Sponsor logos: see HANDOVER.md "Add a sponsor" -->
       <div class="sp-grid">
-        <div class="sp-plate main"><span class="sp-ph">Hovedsponsor</span></div>
         <a class="sp-plate" href="https://www.hoeghautoliners.com" target="_blank" rel="noopener"><img src="dypdykk/sponsors/hoegh-autoliners.png" alt="Høegh Autoliners"/></a>
-        <div class="sp-plate"><span class="sp-ph">Sponsor</span></div>
-        <div class="sp-plate"><span class="sp-ph">Sponsor</span></div>
-        <div class="sp-plate"><span class="sp-ph">Sponsor</span></div>
       </div>
     </div>
   </div>
 
-  <a class="side-ad right" href="https://www.facebook.com/p/110-%C3%A5rs-jubileum-Mannhullet-61590599620480/" target="_blank" rel="noopener">
-    <span class="ad-ph">Jubileumsbanner<br/>1000 × 2000 JPG</span>
-    <img src="dypdykk/ads/banner-hoyre.jpg" alt="Følg Mannhullets 110-årsjubileum på Facebook" loading="lazy" onerror="this.remove()"/>
+  <a class="side-ad" href="https://www.facebook.com/p/110-%C3%A5rs-jubileum-Mannhullet-61590599620480/" target="_blank" rel="noopener">
+    <img src="dypdykk/ads/banner-hoyre.jpg" alt="Følg Mannhullets 110-årsjubileum på Facebook" loading="lazy"/>
   </a>
 </div>
 
-<script type="module" src="dypdykk/js/main.js?v=117"></script>
+<script type="module" src="dypdykk/js/main.js?v=118"></script>
 </body>
 </html>

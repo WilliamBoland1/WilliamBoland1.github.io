@@ -33,11 +33,12 @@
                 calc(100vw - 2 * var(--gutter) - 2 * var(--frame)),
                 calc((100vh - 2 * var(--gutter) - 2 * var(--frame)) * 2 / 3));
 }
-@supports (height: 100dvh) {
+/* svh: sized for the screen with the browser toolbar showing, so the game doesn't resize while scrolling */
+@supports (height: 100svh) {
   :root {
     --game-w: min(480px,
                   calc(100vw - 2 * var(--gutter) - 2 * var(--frame)),
-                  calc((100dvh - 2 * var(--gutter) - 2 * var(--frame)) * 2 / 3));
+                  calc((100svh - 2 * var(--gutter) - 2 * var(--frame)) * 2 / 3));
   }
 }
 
@@ -52,6 +53,7 @@ body {
   overflow-x: hidden;
   user-select: none; -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;     /* fast taps next to the game don't double-tap zoom */
 }
 
 #layout { display: flex; align-items: flex-start; gap: var(--col-gap); flex-wrap: wrap; justify-content: center; }
@@ -72,18 +74,9 @@ body {
     transition: transform 0.15s;
   }
 }
-.side-ad img, .ad-ph { position: absolute; inset: 0; width: 100%; height: 100%; }
-.side-ad img { display: block; object-fit: cover; }
-.side-ad[href]:hover { transform: translateY(-2px); }
+.side-ad img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.side-ad:hover { transform: translateY(-2px); }
 .side-ad:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
-/* Shown until the banner image exists (a missing image removes itself) */
-.ad-ph {
-  display: flex; align-items: center; justify-content: center; text-align: center;
-  background: linear-gradient(180deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
-  outline: 1px dashed rgba(176, 141, 87, 0.4); outline-offset: -14px;
-  font-size: 0.6rem; line-height: 2; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--cream-faint);
-}
 
 /* ── Brass porthole frame ── */
 #game-wrap {
@@ -177,7 +170,7 @@ body {
 .rule { width: 56px; height: 1px; background: var(--brass); opacity: 0.7; margin: 0.5rem auto 1.2rem; }
 
 .btn {
-  width: 210px; margin-bottom: 0.6rem; padding: 0.72rem 1.6rem;
+  width: min(210px, 100%); margin-bottom: 0.6rem; padding: 0.72rem 1.6rem;
   font-family: var(--font-mono); font-weight: 600; font-size: 0.76rem;
   letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--navy); cursor: pointer;
@@ -196,8 +189,8 @@ body {
 .btn.secondary:hover { color: var(--cream); border-color: var(--brass-light); filter: none; }
 
 .name-input {
-  width: 210px; margin-bottom: 0.9rem; padding: 0.62rem 1rem;
-  font-family: var(--font-mono); font-size: 0.88rem; text-align: center;
+  width: min(210px, 100%); margin-bottom: 0.9rem; padding: 0.62rem 1rem;
+  font-family: var(--font-mono); font-size: 1rem; text-align: center;   /* 16px: under that, iOS zooms in on focus */
   color: var(--cream); background: rgba(7, 21, 42, 0.6);
   border: 1px solid rgba(176, 141, 87, 0.5); border-radius: 999px; outline: none;
   user-select: text; -webkit-user-select: text;
@@ -205,6 +198,10 @@ body {
 .name-input::placeholder { color: var(--cream-faint); }
 .name-input:focus { border-color: var(--brass-light); box-shadow: 0 0 0 3px rgba(220, 192, 138, 0.18); }
 .name-input.shake { animation: shake 0.35s ease; border-color: var(--rust); }
+/* Contest rule under the name field; brightens while the player types */
+.name-hint { max-width: 250px; margin: -0.35rem 0 0.9rem; font-size: 0.62rem; line-height: 1.5; color: var(--cream-faint); transition: color 0.15s; }
+.name-hint strong { color: var(--brass-light); font-weight: 600; }
+.name-input:focus + .name-hint { color: var(--cream-dim); }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
 .tip { font-size: 0.66rem; letter-spacing: 0.06em; color: var(--cream-faint); margin-top: 0.5rem; }
@@ -228,6 +225,8 @@ body {
 #leaderboard {
   flex: 1 1 auto; min-height: 0;  /* takes the space the sponsors leave; the list scrolls if short */
   display: flex; flex-direction: column; overflow: hidden;
+}
+#leaderboard, #sponsors {          /* shared navy card */
   background: linear-gradient(180deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
   border: 1px solid rgba(176, 141, 87, 0.45); border-radius: 18px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(243, 233, 210, 0.06);
@@ -281,12 +280,7 @@ body {
 #lb-footer { flex-shrink: 0; padding: 0.6rem 1.2rem; border-top: 1px solid rgba(176, 141, 87, 0.25); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream-faint); text-align: center; }
 
 /* ── Sponsors: logos on cream nameplates, so any logo colour reads on navy ── */
-#sponsors {
-  flex: none; padding-bottom: 0.9rem;
-  background: linear-gradient(180deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
-  border: 1px solid rgba(176, 141, 87, 0.45); border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(243, 233, 210, 0.06);
-}
+#sponsors { flex: none; padding-bottom: 0.9rem; }
 #sp-title { padding: 0.8rem 1.2rem 0.45rem; font-family: var(--font-title); font-weight: 600; font-size: 1.1rem; color: var(--cream); line-height: 1.1; }
 .sp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0.7rem 0.9rem 0; }
 .sp-plate {
@@ -297,24 +291,31 @@ body {
   transition: transform 0.15s, filter 0.15s;
 }
 .sp-plate.main { grid-column: 1 / -1; height: 56px; }
-.sp-plate img { display: block; max-width: 82%; max-height: 70%; object-fit: contain; }
+.sp-plate img { max-width: 82%; max-height: 70%; object-fit: contain; }
 a.sp-plate:hover { transform: translateY(-1px); filter: brightness(1.04); }
 a.sp-plate:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; }
-.sp-ph { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--navy); opacity: 0.45; }
 
-/* Narrow screens: the right column sits under the game at the same width */
-@media (max-width: 760px) {
+/* Narrow screens: the right column sits under the game at the same width.
+   Side by side needs at most 802px + 2 gutters = 834px, so above 840px it always fits. */
+@media (max-width: 840px) {
   #sidebar { width: calc(var(--game-w) + 2 * var(--frame)); height: auto; }
   #leaderboard { max-height: 300px; }
 }
-/* Phones: slimmer frame so the game keeps its width; the bolts follow automatically */
-@media (max-width: 420px) {
-  :root { --frame: 18px; --flange: 12px; --frame-r: 32px; --bolt: 8px; }
+/* Phones (portrait up to the widest iPhone, or landscape): slimmer frame and gutter so the game
+   gets more of the screen; the bolts follow automatically */
+@media (max-width: 460px), (max-height: 500px) {
+  :root { --frame: 18px; --flange: 12px; --frame-r: 32px; --bolt: 8px; --gutter: 10px; }
+}
+/* Short screens (phones in landscape): the game is under ~300px tall, so drop the emblem
+   and tighten the screens to keep both buttons visible */
+@media (max-height: 500px) {
+  .emblem { display: none; }
+  .screen { padding: 0.75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .btn, .sp-plate, .side-ad { transition: none; }
-  .btn:hover, .btn:active, a.sp-plate:hover, .side-ad[href]:hover { transform: none; }
+  .btn:hover, .btn:active, a.sp-plate:hover, .side-ad:hover { transform: none; }
   .name-input.shake { animation: none; }
   .lb-row.fresh::after { animation-name: lb-fresh-calm; }   /* one soft fade instead of two pulses */
 }
