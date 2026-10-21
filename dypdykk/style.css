@@ -23,7 +23,8 @@
   --frame-r: 40px;     /* outer corner radius; inner radii are derived so all curves stay concentric */
   --bolt: 9px;
   --gutter: 16px;
-  --lb-w: 250px;       /* right column: leaderboard and sponsors */
+  --lb-w: 250px;       /* right column: leaderboard and rules */
+  --lb-row: 38px;      /* one leaderboard row; the list is exactly 10 of these */
   --col-gap: 24px;     /* between game, right column and side banners */
   /* Outer size of the game frame, and of the frame plus the right column */
   --frame-h: calc(var(--game-w) * 1.5 + 2 * var(--frame));
@@ -69,7 +70,7 @@ body {
        which crops the image's sides (see the safe zone in HANDOVER.md) */
     width: min(calc(var(--frame-h) / 2),
                calc((100vw - var(--content-w)) / 2 - var(--gutter) - var(--col-gap)));
-    border-radius: 18px;            /* same corners and shadow as the leaderboard and sponsor cards */
+    border-radius: 18px;            /* same corners and shadow as the leaderboard and rules cards */
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
     transition: transform 0.15s;
   }
@@ -214,19 +215,20 @@ body {
 #medal { display: none; }          /* emoji medal doesn't fit the heritage look; logic kept in main.js */
 #saving-msg { font-size: 0.68rem; letter-spacing: 0.06em; margin-top: 0.4rem; min-height: 1.2em; }
 
-/* ── Right column: leaderboard over sponsors, together exactly as tall as the frame ── */
+/* ── Right column: leaderboard over rules, together as tall as the frame
+   (taller on short screens, so all 10 rows and the rules always show) ── */
 #sidebar {
   width: var(--lb-w); flex-shrink: 0;
-  height: var(--frame-h);
+  min-height: var(--frame-h);
   display: flex; flex-direction: column; gap: 14px;
 }
 
 /* ── Leaderboard ── */
 #leaderboard {
-  flex: 1 1 auto; min-height: 0;  /* takes the space the sponsors leave; the list scrolls if short */
+  flex: none;                     /* sized to exactly 10 rows; the rules card takes the rest */
   display: flex; flex-direction: column; overflow: hidden;
 }
-#leaderboard, #sponsors {          /* shared navy card */
+#leaderboard, #rules {             /* shared navy card */
   background: linear-gradient(180deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
   border: 1px solid rgba(176, 141, 87, 0.45); border-radius: 18px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(243, 233, 210, 0.06);
@@ -241,10 +243,10 @@ body {
 .lb-ornament-line:last-child { transform: scaleX(-1); }
 .orn-ring { fill: var(--navy-deep); stroke: var(--brass); stroke-width: 1.6; }
 .orn-bolts { fill: var(--brass-light); }
-#lb-list { flex: 1; overflow-y: auto; padding: 0.4rem 0; }
+#lb-list { height: calc(10 * var(--lb-row) + 0.8rem); overflow-y: auto; padding: 0.4rem 0; }
 #lb-list::-webkit-scrollbar { width: 3px; }
 #lb-list::-webkit-scrollbar-thumb { background: rgba(176, 141, 87, 0.35); }
-.lb-row { position: relative; display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1.2rem; border-bottom: 1px solid rgba(243, 233, 210, 0.06); }
+.lb-row { position: relative; display: flex; align-items: center; gap: 0.75rem; height: var(--lb-row); padding: 0 1.2rem; border-bottom: 1px solid rgba(243, 233, 210, 0.06); }
 .lb-row.me { background: rgba(176, 141, 87, 0.12); }
 .lb-rank { width: 22px; flex-shrink: 0; text-align: center; font-size: 0.8rem; color: var(--cream-faint); }
 /* Top three: the rank is struck on a small brass, silver or bronze medallion */
@@ -279,27 +281,18 @@ body {
 .lb-empty { padding: 1.5rem; font-size: 0.72rem; line-height: 1.6; color: var(--cream-faint); text-align: center; }
 #lb-footer { flex-shrink: 0; padding: 0.6rem 1.2rem; border-top: 1px solid rgba(176, 141, 87, 0.25); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream-faint); text-align: center; }
 
-/* ── Sponsors: logos on cream nameplates, so any logo colour reads on navy ── */
-#sponsors { flex: none; padding-bottom: 0.9rem; }
-#sp-title { padding: 0.8rem 1.2rem 0.45rem; font-family: var(--font-title); font-weight: 600; font-size: 1.1rem; color: var(--cream); line-height: 1.1; }
-.sp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0.7rem 0.9rem 0; }
-.sp-plate {
-  height: 40px; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, #F8F1E0 0%, var(--cream) 55%, #E4D5B3 100%);
-  border: 1px solid var(--brass-dark); border-radius: 8px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 2px rgba(176, 141, 87, 0.22), 0 2px 4px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s, filter 0.15s;
-}
-.sp-plate.main { grid-column: 1 / -1; height: 56px; }
-.sp-plate img { max-width: 82%; max-height: 70%; object-fit: contain; }
-a.sp-plate:hover { transform: translateY(-1px); filter: brightness(1.04); }
-a.sp-plate:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; }
+/* ── Contest rules: fills the column under the leaderboard ── */
+#rules { flex: 1 1 auto; padding-bottom: 0.9rem; }
+#rules-title { padding: 0.8rem 1.2rem 0.45rem; font-family: var(--font-title); font-weight: 600; font-size: 1.1rem; color: var(--cream); line-height: 1.1; }
+.rules-text { padding: 0.7rem 1.2rem 0; font-size: 0.68rem; line-height: 1.6; color: var(--cream-dim); }
+.rules-text p + p { margin-top: 0.55rem; }
+.rules-text strong, .rules-text a { color: var(--brass-light); font-weight: 600; }
+.rules-text a:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; }
 
 /* Narrow screens: the right column sits under the game at the same width.
    Side by side needs at most 802px + 2 gutters = 834px, so above 840px it always fits. */
 @media (max-width: 840px) {
-  #sidebar { width: calc(var(--game-w) + 2 * var(--frame)); height: auto; }
-  #leaderboard { max-height: 300px; }
+  #sidebar { width: calc(var(--game-w) + 2 * var(--frame)); min-height: 0; }
 }
 /* Phones (portrait up to the widest iPhone, or landscape): slimmer frame and gutter so the game
    gets more of the screen; the bolts follow automatically */
@@ -314,8 +307,8 @@ a.sp-plate:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn, .sp-plate, .side-ad { transition: none; }
-  .btn:hover, .btn:active, a.sp-plate:hover, .side-ad:hover { transform: none; }
+  .btn, .side-ad { transition: none; }
+  .btn:hover, .btn:active, .side-ad:hover { transform: none; }
   .name-input.shake { animation: none; }
   .lb-row.fresh::after { animation-name: lb-fresh-calm; }   /* one soft fade instead of two pulses */
 }

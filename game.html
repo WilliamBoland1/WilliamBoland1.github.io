@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <!-- Bump ?v= on each release so browsers don't mix old and new files -->
-  <link rel="stylesheet" href="dypdykk/style.css?v=119"/>
+  <link rel="stylesheet" href="dypdykk/style.css?v=120"/>
 </head>
 <body>
 <div id="layout">
@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <!-- Right column: leaderboard on top, sponsors below; together as tall as the frame -->
+  <!-- Right column: leaderboard on top, rules below; together as tall as the frame -->
   <div id="sidebar">
     <div id="leaderboard">
       <div id="lb-header">
@@ -94,16 +94,18 @@
       <div id="lb-footer">Oppdateres live</div>
     </div>
 
-    <div id="sponsors">
-      <div id="sp-title">Sponsorer</div>
+    <div id="rules">
+      <div id="rules-title">Regler</div>
       <div class="lb-ornament" aria-hidden="true">
         <span class="lb-ornament-line"></span>
         <svg viewBox="0 0 16 16"><use href="#orn"/></svg>
         <span class="lb-ornament-line"></span>
       </div>
-      <!-- Sponsor logos: see HANDOVER.md "Add a sponsor" -->
-      <div class="sp-grid">
-        <a class="sp-plate" href="https://www.hoeghautoliners.com" target="_blank" rel="noopener"><img src="dypdykk/sponsors/hoegh-autoliners.png" alt="Høegh Autoliners"/></a>
+      <!-- Contest rules: fill in the dates for each contest (HANDOVER.md "Update the contest rules") -->
+      <div class="rules-text">
+        <p>Konkurransen varer fra <strong>[dato]</strong> til <strong>[dato]</strong>.</p>
+        <p>Premien er en <strong>ølbong</strong>. Beste spiller og én tilfeldig deltaker vinner hver sin.</p>
+        <p>Begge må være <a href="https://mannhullet.no/jubileum/frivillig.html" target="_blank" rel="noopener">registrert som funker</a>.</p>
       </div>
     </div>
   </div>
@@ -113,6 +115,6 @@
   </a>
 </div>
 
-<script type="module" src="dypdykk/js/main.js?v=119"></script>
+<script type="module" src="dypdykk/js/main.js?v=120"></script>
 </body>
 </html>

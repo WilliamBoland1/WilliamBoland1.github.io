@@ -34,7 +34,7 @@ These came from the original brief. They exist because the game is used for scor
 4. **No image files in the game.** Everything inside the frame is drawn with canvas paths and
    gradients, or inline SVG. (The beer crate was considered as a PNG and kept in canvas on purpose.)
    The one approved exception is page-level content outside the frame: the jubilee side banners
-   (`ads/`) and the sponsor logos (`sponsors/`).
+   (`ads/`).
 5. **Calm heritage look:** navy, cream and brass colours, Fraunces for titles, JetBrains Mono
    for numbers and labels. No neon and no arcade look.
 6. **All player-facing text is in Norwegian bokmål.**
@@ -62,15 +62,15 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Phone, tablet and landscape fit** (`?v=118`, CSS only). The game height uses `100svh`, so it doesn't resize when the browser toolbar hides. The right column stacks under the game below 840 px (side by side needs 834 px; iPads in portrait used to get a 250 px wide, frame-tall column). Phones up to 460 px wide and screens under 500 px tall get the slim frame and a 10 px gutter. Short screens also hide the emblem and tighten the overlay screens. The name field is 16 px, and the page has `touch-action: manipulation`. | Safari zooms into inputs under 16 px and stays zoomed, and fast taps beside the game could double-tap zoom. Landscape phones give a game about 190 px wide: it stays usable, with no "rotate" hint by choice. |
 | **Full names for the contest** (`?v=118`). A short rule under the name field (`#name-hint`): "Bruk fullt navn for å delta i konkurransen. Ett navn, én poengsum: din beste lagres." It brightens while the field has focus. The field takes 24 characters (was 16), the placeholder reads "Fullt navn…" and `autocomplete="name"` lets phones suggest the player's full name. Space in the field now types a space (one guard in the `keydown` listener in main.js, idle state only). | `scores/` keeps one record per name, so two players called "Ola" would share one score. `scoreboard.js` is unchanged: `nameKey()` turns spaces into `_` and keeps 20 characters, so names that match in their first 20 characters still share a record. |
 | **Difficulty step at 20** (`?v=119`). Obstacles spawned once the score is 20 or more have a 155 px gap instead of 170 (`HARD_AT`, `HARD_GAP` in constants.js). `makePipe()` stores the gap on the pipe (`p.gap`), and `collides()` and `obstacle.js` read it from there. The `topH` range uses the same gap, so the top and bottom margins stay the same. | A small step up for good players. 20 is also the second depth-colour change, so the darker water signals it and no extra UI is needed. The gap is fixed when an obstacle spawns off-screen, so the 1–2 obstacles already in view when the score reaches 20 keep the wide gap. Below 20 nothing changed: same arithmetic, same `Math.random` calls, identical step-600 dump. Scores above about 20 from before `?v=119` are from an easier game, so release it at a weekly reset (clear `scores/` on Monday). |
+| **Contest rules instead of sponsors; leaderboard sized to 10 rows** (`?v=120`, HTML/CSS only). The sponsor card is gone and a "Regler" card (`#rules`) under the leaderboard gives the contest dates, the prize (a beer token for the best player and one random player) and that both winners must be registered as volunteers ("funker"), linking to the volunteer sign-up. Every leaderboard row is `--lb-row` (38 px) tall and the list is exactly 10 rows high, so there is neither a gap nor a scrollbar; the rules card fills the rest of the column. The column is now at least (`min-height`) as tall as the frame instead of exactly as tall. | Sponsors weren't needed on this page, and the rules belong next to the scores. On viewports about 700 px tall or less, 10 rows plus the rules don't fit beside the frame, so the column runs a little past it rather than cutting off rows or rules. |
 
 ## Architecture
 
 ```
 game.html                    markup only; links style.css and js/main.js with ?v=110
 dypdykk/
-  style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, sponsors
+  style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, rules
   ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners)
-  sponsors/                  sponsor logos (SVG), referenced from #sponsors in game.html
   js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, HARD_AT, HARD_GAP. DO NOT CHANGE.
   js/config.js               CONFIG: every visual value (colours, depth stages, particles…)
   js/main.js                 state, step(), loop(), render(), collides(), flap(), gameOver(),
@@ -149,14 +149,9 @@ near snow → seabed strip → bubbles, headlamp, ROV.
     jubilee Facebook page. Change the `href` on the `.side-ad` links in `game.html` to match a new
     banner. They open in a new tab, and switching tabs pauses a running game.
   - Update the `alt` text to describe the banner.
-- **Add a sponsor:** put the logo in `sponsors/` (SVG, or a PNG with a transparent background
-  like `hoegh-autoliners.png`), then add a plate to `.sp-grid` in `game.html`:
-  `<a class="sp-plate" href="https://…" target="_blank" rel="noopener"><img src="dypdykk/sponsors/navn.svg" alt="Navn"/></a>`.
-  - A main sponsor gets `class="sp-plate main"` and goes first: full width and taller.
-  - Plates are cream, so the logo keeps its own colours. Trim empty margins from the logo (for an SVG,
-    its `viewBox`), or the logo looks small.
-  - Up to four small plates fit without squeezing the leaderboard. More plates still work,
-    but the leaderboard list then scrolls sooner.
+- **Update the contest rules:** edit the paragraphs in `.rules-text` in `game.html`. For each
+  contest, replace the two `[dato]` placeholders with the start and end dates. Keep the rules short:
+  on screens about 700 px tall or less, every extra line makes the column run further past the frame.
 - **Change text:** screens are in `game.html`, save messages in `gameOver()` in main.js, and
   the empty-leaderboard message is in scoreboard.js.
 - **Release:** commit, push, and bump `?v=110` on both links in `game.html`.
