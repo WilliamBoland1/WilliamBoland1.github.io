@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <!-- Bump ?v= on each release so browsers don't mix old and new files -->
-  <link rel="stylesheet" href="dypdykk/style.css?v=120"/>
+  <link rel="stylesheet" href="dypdykk/style.css?v=121"/>
 </head>
 <body>
 <div id="layout">
@@ -47,6 +47,8 @@
           <!-- Contest rule: one leaderboard record per name, only its best score is kept (scoreboard.js) -->
           <div class="name-hint" id="name-hint"><strong>Bruk fullt navn</strong> for å delta i konkurransen. Ett navn, én poengsum: din beste lagres.</div>
           <button class="btn" id="start-btn">Start dykket</button>
+          <!-- Phones only: opens the leaderboard and rules as a sheet (style.css) -->
+          <button class="btn secondary info-btn">Toppliste og regler</button>
           <div class="tip">Trykk eller press mellomrom for å svømme</div>
         </div>
 
@@ -60,6 +62,7 @@
           </div>
           <button class="btn" id="retry-btn">Prøv igjen</button>
           <button class="btn secondary" id="menu-btn">Meny</button>
+          <button class="btn secondary info-btn">Toppliste og regler</button>
           <div id="saving-msg"></div>
         </div>
 
@@ -71,7 +74,8 @@
     </div>
   </div>
 
-  <!-- Right column: leaderboard on top, rules below; together as tall as the frame -->
+  <!-- Right column: leaderboard on top, rules below; together as tall as the frame.
+       On phones it is hidden and opens as a full-screen sheet instead -->
   <div id="sidebar">
     <div id="leaderboard">
       <div id="lb-header">
@@ -108,6 +112,9 @@
         <p>Begge må være <a href="https://mannhullet.no/jubileum/frivillig.html" target="_blank" rel="noopener">registrert som funker</a>.</p>
       </div>
     </div>
+
+    <!-- Phones only: closes the sheet -->
+    <button class="btn" id="info-close">Tilbake til spillet</button>
   </div>
 
   <a class="side-ad" href="https://www.facebook.com/p/110-%C3%A5rs-jubileum-Mannhullet-61590599620480/" target="_blank" rel="noopener">
@@ -115,6 +122,6 @@
   </a>
 </div>
 
-<script type="module" src="dypdykk/js/main.js?v=120"></script>
+<script type="module" src="dypdykk/js/main.js?v=121"></script>
 </body>
 </html>

@@ -28,9 +28,13 @@ Firebase.
   The top three ranks sit on brass, silver and bronze medallions.
 - **Pause:** switching tabs in the middle of a run shows "Pause"; a tap or Space continues.
 - **DevTools:**
-  - Device toolbar at phone width: the frame fits and the leaderboard sits below. Also iPad
-    portrait (768, 820): leaderboard below at frame width. Phone landscape (844×390, 667×375):
-    no emblem, and the start button, "Prøv igjen" and "Meny" are fully visible.
+  - Device toolbar at phone width (390×844, 360×640): no brass frame, no leaderboard below and
+    no page scroll. "Toppliste og regler" on the start and crash screens opens the leaderboard
+    and rules as a full-screen sheet, "Tilbake til spillet" closes it, and Space does nothing
+    while it is open. Also iPad portrait (768, 820): frame, leaderboard below at frame width,
+    and no "Toppliste og regler" button. Phone landscape (844×390, 667×375): no emblem, and the
+    start button, "Prøv igjen", "Meny" and "Toppliste og regler" are fully visible. The sheet
+    scrolls, with "Tilbake til spillet" pinned at the bottom.
   - Rendering → "prefers-reduced-motion: reduce": fewer snow specks, the rays stop swaying,
     the distant fish and jellyfish stop wiggling and pulsing, and the leaderboard glow is a
     single fade.

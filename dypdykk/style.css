@@ -294,15 +294,33 @@ body {
 @media (max-width: 840px) {
   #sidebar { width: calc(var(--game-w) + 2 * var(--frame)); min-height: 0; }
 }
-/* Phones (portrait up to the widest iPhone, or landscape): slimmer frame and gutter so the game
-   gets more of the screen; the bolts follow automatically */
+/* Phone-only buttons that open and close the leaderboard and rules sheet */
+.info-btn, #info-close { display: none; }
+
+/* Phones (portrait up to the widest iPhone, or landscape): the game alone, as big as it gets.
+   No brass frame, and the right column becomes a full-screen sheet that the
+   "Toppliste og regler" buttons open (body.info-open, main.js) */
 @media (max-width: 460px), (max-height: 500px) {
-  :root { --frame: 18px; --flange: 12px; --frame-r: 32px; --bolt: 8px; --gutter: 10px; }
+  :root { --frame: 0px; --frame-r: 18px; --gutter: 10px; }   /* same corners as the cards */
+  #game-wrap { background: none; }
+  #game-wrap::before, .bolt { display: none; }
+  .info-btn { display: block; padding-inline: 1rem; }        /* narrower padding keeps the label on one line */
+  #sidebar { display: none; }
+  body.info-open #sidebar {
+    display: flex; position: fixed; inset: 0; z-index: 10;
+    width: auto; min-height: 0; overflow-y: auto;
+    /* viewport-fit=cover: keep clear of the notch and home indicator */
+    padding: max(var(--gutter), env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+             max(var(--gutter), env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+    background: var(--navy-deep);
+  }
+  body.info-open #leaderboard, body.info-open #rules { width: 100%; max-width: 400px; margin-inline: auto; }
+  #info-close { display: block; width: auto; position: sticky; bottom: 0; align-self: center; flex-shrink: 0; }   /* reachable while the sheet scrolls */
 }
-/* Short screens (phones in landscape): the game is under ~300px tall, so drop the emblem
-   and tighten the screens to keep both buttons visible */
+/* Short screens (phones in landscape): the game is under ~370px tall, so drop the emblem and
+   the decorative lines and tighten the screens to keep all buttons visible */
 @media (max-height: 500px) {
-  .emblem { display: none; }
+  .emblem, .screen-sub, .rule { display: none; }
   .screen { padding: 0.75rem; }
 }
 

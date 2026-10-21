@@ -174,6 +174,7 @@ function press(){
 }
 
 document.addEventListener('keydown',e=>{
+  if(document.body.classList.contains('info-open')) return;   // sheet open: keys work its buttons, not the game
   if(state==='idle' && e.target.id==='player-name' && e.code==='Space') return;   // full names need spaces; Enter starts
   if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();press();}
 });
@@ -188,6 +189,9 @@ document.getElementById('player-name').addEventListener('keydown',e=>{ if(e.key=
 document.getElementById('start-btn').addEventListener('click',()=>{ flap(); });
 document.getElementById('retry-btn').addEventListener('click',()=>{ reset(); state='playing'; bird.vy=JP; bird.flap=8; showScreen(null); });
 document.getElementById('menu-btn').addEventListener('click',()=>{ reset(); state='idle'; showScreen('start-screen'); });
+// Phones: the leaderboard and rules open as a full-screen sheet (style.css)
+document.querySelectorAll('.info-btn').forEach(b=>b.addEventListener('click',()=>{ document.body.classList.add('info-open'); document.getElementById('info-close').focus(); }));
+document.getElementById('info-close').addEventListener('click',()=>document.body.classList.remove('info-open'));
 document.addEventListener('visibilitychange',()=>{ if(document.hidden && state==='playing') pause(); });
 
 new ResizeObserver(fitCanvas).observe(canvas);
