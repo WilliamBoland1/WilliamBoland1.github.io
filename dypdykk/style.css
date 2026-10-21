@@ -151,7 +151,21 @@ body {
 }
 .screen.hidden { display: none; }
 
-.emblem { width: 64px; height: 64px; margin-bottom: 0.9rem; }
+/* Start screen: the title sits above the bobbing ROV and the controls below it, so the ROV shows
+   in between. --u is one game unit (the game is 360 wide); the idle ROV bobs between y = 217 and 267.
+   On small phones the gap gives way first, so the controls always fit. Short screens (landscape)
+   have no room for it and keep the centred stack. */
+@media (min-height: 501px) {
+  #start-screen { --u: calc(var(--game-w) / 360); justify-content: flex-start; }
+  .start-head {
+    flex: 0 1 calc(279 * var(--u) - 1.5rem); min-height: 0;   /* top padding down to the controls at y = 279 */
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  }
+  .start-head::after { content: ''; flex: 0 1 calc(74 * var(--u)); }   /* the gap: title ends at y = 205 */
+  .start-head .screen-sub { margin-bottom: 0; }
+}
+
+.emblem { width: 64px; height: 64px; margin-bottom: 0.9rem; flex-shrink: 0; }
 .emblem-ring { fill: none; stroke: var(--brass); stroke-width: 6; }
 .emblem-glass { fill: rgba(7, 21, 42, 0.6); stroke: var(--brass-dark); stroke-width: 1; }
 .emblem-bolts { fill: var(--brass-light); }

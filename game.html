@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <!-- Bump ?v= on each release so browsers don't mix old and new files -->
-  <link rel="stylesheet" href="dypdykk/style.css?v=121"/>
+  <link rel="stylesheet" href="dypdykk/style.css?v=122"/>
 </head>
 <body>
 <div id="layout">
@@ -30,6 +30,8 @@
         <div id="score-display">0</div>
 
         <div class="screen" id="start-screen">
+          <!-- Title above the bobbing ROV, controls below it (style.css "Start screen") -->
+          <div class="start-head">
           <svg class="emblem" viewBox="0 0 64 64" aria-hidden="true">
             <circle class="emblem-ring" cx="32" cy="32" r="27"/>
             <circle class="emblem-glass" cx="32" cy="32" r="23.5"/>
@@ -43,6 +45,7 @@
           </svg>
           <div class="screen-title">Dypdykk <span class="num">110</span></div>
           <div class="screen-sub">Mannhullet 110 år</div>
+          </div>
           <input class="name-input" id="player-name" type="text" maxlength="24" placeholder="Fullt navn…" autocomplete="name" aria-describedby="name-hint"/>
           <!-- Contest rule: one leaderboard record per name, only its best score is kept (scoreboard.js) -->
           <div class="name-hint" id="name-hint"><strong>Bruk fullt navn</strong> for å delta i konkurransen. Ett navn, én poengsum: din beste lagres.</div>
@@ -122,6 +125,6 @@
   </a>
 </div>
 
-<script type="module" src="dypdykk/js/main.js?v=121"></script>
+<script type="module" src="dypdykk/js/main.js?v=122"></script>
 </body>
 </html>
