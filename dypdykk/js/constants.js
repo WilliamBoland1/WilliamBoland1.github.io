@@ -14,9 +14,10 @@ export const GH=55, PW=58, GAP=170, GR=0.44, JP=-8.5, PS=3, PINT=1600;
 // (44 px body + 10 px bottle necks), ROPE the width of the rope centred above it.
 export const CRATE=54, ROPE=4;
 
-// Difficulty step (approved by William, ?v=119): obstacles spawned once the
-// score reaches HARD_AT get the narrower HARD_GAP opening instead of GAP.
-export const HARD_AT=20, HARD_GAP=155;
+// Depth ladder (approved by William; 20 since ?v=119, 30 and 40 since ?v=129):
+// obstacles spawned once the score reaches `at` get that narrower opening
+// instead of GAP. Highest step first. 140 is the floor: a flap arc is ~82 px.
+export const GAPS=[[40,140],[30,145],[20,155]];
 
 // Fixed simulation step: the game updates exactly 60 times per second on every display.
 export const STEP = 1000/60;

@@ -43,7 +43,7 @@ export const CONFIG = {
     transitionMs: 4000,          // slow cross-fade between stages
     // Water gradient (top / middle / bottom), light-ray strength, ROV lamp
     // strength, warm seabed glow, and haze (how much the water colour tints
-    // the bulkheads) per stage. Loops after the last one.
+    // the bulkheads) per stage. Stays on the last one.
     stages: [
       { top: '#7FBCD6', mid: '#4B93B8', bot: '#2A6A92', rays: 0.16,  lamp: 0.16, glow: 0,    haze: 0.08 }, // near the surface
       { top: '#3E86B0', mid: '#23628E', bot: '#154569', rays: 0.09,  lamp: 0.26, glow: 0,    haze: 0.16 }, // mid water

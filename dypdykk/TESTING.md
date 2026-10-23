@@ -20,9 +20,9 @@ Firebase.
 - **Play:** the score goes up by 1 per obstacle. Touching the crate (bottle caps included), a
   container's roof, or the centred rope (flying too high) is a crash. Flying above the crate
   is allowed until the ROV reaches the rope.
-- **Difficulty step:** shortly after the colour change at 20, the openings get narrower
-  (155 px instead of 170). Obstacles already on screen at 20 keep the wide gap.
-- **Depth:** the colours fade slowly at 10, 20 and 30, and return to light blue at 40.
+- **Depth ladder:** shortly after each colour change the openings get narrower: 155 px from 20,
+  145 from 30, and 140 from 40 (170 before). Obstacles already on screen keep their gap.
+- **Depth:** the colours fade slowly at 10, 20 and 30, and stay on the lamp-lit seabed from then on (also at 40 and above).
 - **Crash:** "Kræsj!" appears, "Prøv igjen" and "Meny"
   work, and a new best shows up live in the Toppliste, where its row glows brass twice.
   The top three ranks sit on brass, silver and bronze medallions.
@@ -96,11 +96,18 @@ and compare the final score of every run. For the centred rope (`?v=112`) all 10
 matched. 1.6 % of runs crashed a few steps later (at the rope instead of the old column
 edge), and none crashed earlier.
 
-**The difficulty step at 20** is out of reach of the step-600 dump (score 5). To check it, start
+**The depth ladder (`GAPS`)** is out of reach of the step-600 dump (score 5). To check it, start
 the test copy at 19 in `__pilot` (`if(simStep===lastPipe+1&&score===0){score=19;updScore(score);}`),
 log `[score, p.gap]` the first time each pipe appears, and run for about 45 s of virtual time.
-Pipes that appear at 19 must have gap 170, and every pipe after that 155. In `?v=119` the pilot above
-cleared 27 narrow gaps (score 19 → 46) without crashing.
+Pipes that appear below 20 must have gap 170, from 20 155, from 30 145 and from 40 140. Repeat from
+29 and 39. In `?v=129` all three logs matched. The pilot above aims at `gap/2+15`, which suits 155 but
+clips the crate at 140, so it crashes soon after 40; use `gap/2+18` there (it then holds 40 → 44 and beyond).
+
+**Is a gap still fair?** Copy `step()`, `makePipe()` and `collides()` into a Node script, give every
+pipe the same gap, and run 400 seeded runs per gap with the pilot above, the best aim offset for that
+gap, and a random 0–N step delay before each flap (human timing). In `?v=129`, with up to 3 steps
+(50 ms) late, 155, 145 and 140 all cleared 100 obstacles in every run, 135 in 99 %, and 130 in none.
+That cliff is why 140 is the floor.
 
 **Pitfall: pipe heights come from the shared `Math.random`.** Any code that calls
 `Math.random` before or between pipe spawns shifts the heights, even if the physics is

@@ -1,7 +1,7 @@
 // Dypdykk 110: game state, fixed-step loop and input.
 // Game rules are unchanged from Flakse Fugl, except the narrower gap from
-// HARD_AT (see constants.js); the render/ modules only draw.
-import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, HARD_AT, HARD_GAP } from './constants.js';
+// GAPS depth ladder (see constants.js); the render/ modules only draw.
+import { W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, GAPS } from './constants.js';
 import './leaderboard-fx.js';                  // first, so it is watching before the leaderboard's first render
 import { submitScore } from './scoreboard.js';
 import { Background } from './render/background.js';
@@ -18,7 +18,7 @@ let bird, pipes, lastPipe, lastTime, playerName='';
 function makeBird(){ return {x:90,y:H/2-30,vy:0,angle:0,flap:0}; }
 
 // The gap is fixed when the pipe spawns off-screen, so it never shrinks in view.
-function makePipe(x){ const gap=score>=HARD_AT?HARD_GAP:GAP; return {x, gap, topH:Math.random()*(H-GH-gap-120)+70, scored:false}; }
+function makePipe(x){ const gap=GAPS.find(([at])=>score>=at)?.[1]??GAP; return {x, gap, topH:Math.random()*(H-GH-gap-120)+70, scored:false}; }
 
 // ── Canvas sizing ──
 // CSS decides how big the canvas is on screen. The backing store matches that

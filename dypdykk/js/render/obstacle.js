@@ -10,7 +10,7 @@
 //  - Rope: ROPE px wide, centred on the obstacle, from the surface down to
 //    the crate box.
 //  - Containers: x-6 … x+PW+6, below topH+gap (the pipe's own gap: GAP, or
-//    HARD_GAP from HARD_AT); the top container's roof is the bottom of the opening.
+//    a narrower one from the GAPS ladder); the top container's roof is the bottom of the opening.
 // ══════════════════════════════════════════════════════════════════
 import { CONFIG } from '../config.js';
 import { H, GH, PW, CRATE, ROPE } from '../constants.js';

@@ -32,7 +32,7 @@ export const Background = (() => {
   let waterGrad = null, groundTintCss = '', hazeCss = '', rayGrad = null, glowGrad = null;
 
   function updateStage(dt, score) {
-    const idx = Math.floor(score / D.every) % stages.length;
+    const idx = Math.min(Math.floor(score / D.every), stages.length - 1);   // stays on the seabed: the deepest water is the hardest
     if (idx !== stageIndex) {
       // start a new cross-fade from whatever is showing now (even mid-fade)
       stageIndex = idx; from = copyStage(cur); to = stages[idx]; progress = 0;
