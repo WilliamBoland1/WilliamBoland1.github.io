@@ -181,14 +181,12 @@ near snow → seabed strip → bubbles, headlamp, ROV.
   - Update the `alt` text to describe the banner.
 - **Favicon:** `img/favicon-32.png` (browser tab) and `img/apple-touch-icon.png` (180 px, iPhone
   home screen), linked in the `<head>` of `game.html`, game page only. Both are the **dark** logo
-  (navy ring, grey anchor), page 2 of the committee's "Logo jub110.pdf", without its text: the
-  glass inside the porthole is see-through with only the anchor's shank and the waves in it
-  ("NTH 110" is gone), "1917 - 2027" is painted over in the ring's navy, and the bolt holes stay
-  white. The PDF is one flattened image on white, so this was done on the pixels: the ring is the
-  largest navy area, the glass the largest area it encloses, the waves are the navy pieces below
-  "110", and the white outside the ring became transparent. The shank's middle was hidden behind
-  "NTH 110", so it is redrawn as one bar (same grey and outline) along the edges of the visible
-  pieces above and below the text.
+  (navy ring, grey anchor, "NTH 110"), page 2 of the committee's "Logo jub110.pdf", unchanged
+  except that the white glass inside the porthole is see-through. The bolt holes stay white. The PDF
+  is one flattened image on white, so this was done on the pixels: the ring is the largest navy
+  area, the glass the largest area it encloses, and the white outside the ring is transparent. In
+  the glass, the navy text and waves keep soft edges (each pixel is read as navy over white) and the
+  grey shank pieces stay opaque.
   The tab icon fills the full height on a transparent background; the touch icon sits on white
   with 10 % padding (iOS needs it opaque and rounds the corners). On dark tab bars the navy ring is
   faint, but the white bolt holes and grey anchor still read.
