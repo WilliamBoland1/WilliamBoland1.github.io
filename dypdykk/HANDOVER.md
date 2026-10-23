@@ -73,7 +73,8 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Rules as a cream note with the prize up front** (`?v=127`, HTML/CSS only). The rules card is now a note of cream paper (`--paper`, ink-navy text) with a strip of tape, a slight tilt and a drop shadow. It opens with an inline SVG beer mug and the headline "Vinn en ølbong", then a small "Regler" label over the rules; the prize line became "Beste spiller og én tilfeldig deltaker vinner hver sin." On wide screens the right column (banner over the note) gets 58 % of the room beside the game and the left banner the rest (`--side-room`); both still stop at the banners' 1:2 shape. At 1440×900 the note grows from 279 to 324 px wide. | The prize should catch the eye: a paper note stands out among the navy cards and fits the heritage look. The wider column gives the headline room; the price is a narrower left banner on laptops (see "Swap a side banner"). The same note shows in the tablet column and the phone sheet. No JS changed. |
 | **Game centred on wide screens** (`?v=128`, CSS only). With the side banners showing, the columns are sized so the game sits in the middle of the screen: the left column is as wide as everything right of the game (leaderboard, gap, right column), and the right column gets half of what the leaderboard leaves (`--right-w`, `--left-w` in `#layout`). The right column never drops under 260 px (or v127's 58 %, if that is less) and never exceeds the artwork's 1:2 shape; the left banner never exceeds 1:2 either and sits next to the game (`justify-self: end`), so on very wide screens the spare room is empty navy at the far left. Exactly centred from about 1660 px wide (1920×1080: banner 384, right column 382); below that the note's floor pushes the game left as little as it can (1440×900: about 120 px off centre instead of 180; 1490×754: 77 instead of 185). At 1240 px nothing changed. | The game is the point of the page, and with the leaderboard and the right column on one side it sat well left of centre. Widths are the only thing that moves: same order, same cards. 260 px is the width v127 already gave the note at 1280 px, so it stays readable; lower it to centre more on laptops at the cost of a narrower note. No JS changed. |
 | **Depth ladder; the water stays deep** (`?v=129`). `HARD_AT`/`HARD_GAP` became `GAPS` in constants.js: obstacles spawned from score 30 get a 145 px gap and from 40 a 140 px gap, on top of the 155 px from 20. The water no longer loops back to the surface at 40; it stays on the lamp-lit seabed (`Math.min` instead of `%` in `updateStage()`, background.js). | Deeper means tighter, and the darker water announces each step, so no UI is needed. Before, the hardest part of a run had the brightest water. 140 is the floor: a flap rises about 82 px and the ROV's hitbox is 20 px tall. In 400 seeded runs per gap, an autopilot that taps up to 50 ms late cleared 100 obstacles every time at 140 and none at 130 (see TESTING.md). Below 30 nothing changed: identical step-600 dump. Scores above 30 from before `?v=129` are from an easier game, so release it at a weekly reset. |
-| **Funk poster as the left banner** (`?v=130`). `ads/banner-venstre.jpg` is now the funk recruitment poster (`images/Funkeplakat-1-4.pdf`, application deadline 9.11) instead of the "Har du søkt funk?" stock photo. The A-size poster is scaled to 1000 px wide at the bottom of the 1000 × 2000 canvas, with its own cream filling the top. The title (FUNK, 110-årsjubileum, søknadsfrist) is lifted out of the empty cream above the waves: in the PDF it is three text objects over the wave image, so the waves are rendered without them (pypdfium2, removing those objects), and the title is rendered alone and centred in the cream. `.ad-left img` uses `object-fit: contain` at the bottom, so on narrower columns the whole poster shrinks instead of losing its sides. Same link (volunteer sign-up). | The poster has text out to its edges ("110-årsjubileum", "Kultur", "Vertskap"), which the usual side crop cut off below about 1530 px wide. The stock photo also still had its Shutterstock watermark. CSS and image only; no JS changed. |
+| **Funk poster as the left banner** (`?v=130`). `ads/banner-venstre.jpg` is now the funk recruitment poster (`images/Funkeplakat-1-4.pdf`, application deadline 9.11) instead of the "Har du søkt funk?" stock photo. The A-size poster is scaled to 1000 px wide at the bottom of the 1000 × 2000 canvas, with its own cream filling the top. The title (FUNK, 110-årsjubileum, søknadsfrist) is moved up into the empty cream above the waves: in the PDF it is three text objects over the wave image, so the waves are rendered without them (pypdfium2, removing those objects), and the title is rendered alone and centred in the cream. `.ad-left img` uses `object-fit: contain` at the bottom, so on narrower columns the whole poster shrinks instead of losing its sides. Same link (volunteer sign-up). | The poster has text out to its edges ("110-årsjubileum", "Kultur", "Vertskap"), which the usual side crop cut off below about 1530 px wide. The stock photo also still had its Shutterstock watermark. CSS and image only; no JS changed. |
+| **Right banner rotates** (`?v=131`). Each page load shows the Facebook ad or the old "Har du søkt funk?" ad (back as `ads/banner-funk.jpg`, linking to the volunteer sign-up), 50/50. A small inline script right after `.ad-right` in `game.html` picks a row from its `ads` list and sets the link, image and alt text. | Both messages get the slot without a timer swapping images under the player. Inline, not in main.js: main.js only runs once Firebase has loaded, so the ad would visibly change; inline it is set before the image loads, and with no `src` in the markup only the chosen image downloads. `crypto.getRandomValues`, not `Math.random`, so pipe heights and the step-600 dump are untouched (identical dump). The funk photo still has its Shutterstock watermark; at 1:2 the bar at its bottom shows (about 1500–1700 px wide). |
 
 ## Architecture
 
@@ -82,7 +83,8 @@ game.html                    markup only; links style.css and js/main.js with ?v
 dypdykk/
   style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, rules
   ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners)
-  img/                       logo-nth110.png (official jubilee logo, white-ring version, start screen)
+  img/                       logo-nth110.png (official jubilee logo, white-ring version, start screen),
+                             favicon-32.png + apple-touch-icon.png (the dark version of the logo)
   js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, GAPS. DO NOT CHANGE.
   js/config.js               CONFIG: every visual value (colours, depth stages, particles…)
   js/main.js                 state, step(), loop(), render(), collides(), flap(), gameOver(),
@@ -168,10 +170,28 @@ near snow → seabed strip → bubbles, headlamp, ROV.
     about 1:1.9 at 1440×900 and 1:1.8 at 1490×754 (nearly all of it shows), and about 1:1.4 at
     1920×1080, where roughly 285 px are cut off the top and the bottom.
     **Keep text and logos inside the central 640 × 1400 px.**
-  - Each banner links to its own page: the left one to the volunteer sign-up, the right one to the
-    jubilee Facebook page. Change the `href` on the `.side-ad` links in `game.html` to match a new
+  - The right slot rotates: since `?v=131` each page load picks one ad at random from the `ads` list
+    in the inline script after `.ad-right` in `game.html` (now `banner-hoyre.jpg`, the Facebook ad,
+    and `banner-funk.jpg`, "Har du søkt funk?"). To add, drop or swap a right-side ad, edit a
+    `[link, image, alt text]` row there; the `<img>` has no `src` in the markup so only the chosen
+    image downloads.
+  - Each banner links to its own page: the left one to the volunteer sign-up; the right one to
+    whatever its `ads` row says. Change the left `href` on `.ad-left` in `game.html` to match a new
     banner. They open in a new tab, and switching tabs pauses a running game.
   - Update the `alt` text to describe the banner.
+- **Favicon:** `img/favicon-32.png` (browser tab) and `img/apple-touch-icon.png` (180 px, iPhone
+  home screen), linked in the `<head>` of `game.html`, game page only. Both are the **dark** logo
+  (navy ring, grey anchor), page 2 of the committee's "Logo jub110.pdf", without its text: the
+  glass inside the porthole is see-through with only the anchor's shank and the waves in it
+  ("NTH 110" is gone), "1917 - 2027" is painted over in the ring's navy, and the bolt holes stay
+  white. The PDF is one flattened image on white, so this was done on the pixels: the ring is the
+  largest navy area, the glass the largest area it encloses, the waves are the navy pieces below
+  "110", and the white outside the ring became transparent. The shank's middle was hidden behind
+  "NTH 110", so it is redrawn as one bar (same grey and outline) along the edges of the visible
+  pieces above and below the text.
+  The tab icon fills the full height on a transparent background; the touch icon sits on white
+  with 10 % padding (iOS needs it opaque and rounds the corners). On dark tab bars the navy ring is
+  faint, but the white bolt holes and grey anchor still read.
 - **Update the contest rules:** edit the paragraphs in `.rules-text` in `game.html`. For each
   contest, replace the two `[dato]` placeholders with the start and end dates. Keep the rules short:
   on screens about 700 px tall or less, every extra line makes the column run further past the frame.
