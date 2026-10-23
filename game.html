@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <!-- Bump ?v= on each release so browsers don't mix old and new files -->
-  <link rel="stylesheet" href="dypdykk/style.css?v=132"/>
+  <link rel="stylesheet" href="dypdykk/style.css?v=133"/>
 </head>
 <body>
 <div id="layout">
@@ -129,6 +129,7 @@
       const ads = [   // [link, image, alt text]
         ['https://www.facebook.com/p/110-%C3%A5rs-jubileum-Mannhullet-61590599620480/', 'dypdykk/ads/banner-hoyre.jpg', 'Følg Mannhullets 110-årsjubileum på Facebook'],
         ['https://mannhullet.no/jubileum/frivillig.html', 'dypdykk/ads/banner-funk.jpg', 'Har du søkt funk? Bli frivillig på Mannhullets 110-årsjubileum'],
+        ['https://www.instagram.com/jub110_mannhullet/', 'dypdykk/ads/banner-tierlist.jpg', 'Marin IG tier list: jub110_mannhullet alene på topp. Følg!'],
       ];
       const [href, src, alt] = ads[crypto.getRandomValues(new Uint8Array(1))[0] % ads.length];
       const ad = document.querySelector('.ad-right');
@@ -137,6 +138,6 @@
   </script>
 </div>
 
-<script type="module" src="dypdykk/js/main.js?v=132"></script>
+<script type="module" src="dypdykk/js/main.js?v=133"></script>
 </body>
 </html>

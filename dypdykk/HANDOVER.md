@@ -83,7 +83,8 @@ If a request conflicts with one of these rules, ask William before doing it.
 game.html                    markup only; links style.css and js/main.js with ?v=110
 dypdykk/
   style.css                  colour tokens (:root), brass frame, screens, leaderboard, side banners, rules
-  ads/                       banner-venstre.jpg, banner-hoyre.jpg (side banners)
+  ads/                       banner-venstre.jpg (left), banner-hoyre.jpg, banner-funk.jpg,
+                             banner-tierlist.jpg (right, rotating)
   img/                       logo-nth110.png (official jubilee logo, white-ring version, start screen),
                              favicon-32.png + apple-touch-icon.png (the dark version of the logo)
   js/constants.js            W, H, GH, PW, GAP, GR, JP, PS, PINT, STEP, CRATE, ROPE, GAPS. DO NOT CHANGE.
@@ -173,7 +174,8 @@ near snow → seabed strip → bubbles, headlamp, ROV.
     **Keep text and logos inside the central 640 × 1400 px.**
   - The right slot rotates: since `?v=131` each page load picks one ad at random from the `ads` list
     in the inline script after `.ad-right` in `game.html` (now `banner-hoyre.jpg`, the Facebook ad,
-    and `banner-funk.jpg`, "Har du søkt funk?"). To add, drop or swap a right-side ad, edit a
+    `banner-funk.jpg`, "Har du søkt funk?", and since `?v=133` `banner-tierlist.jpg`, the "Marin IG
+    tier list" linking to the jubilee Instagram). To add, drop or swap a right-side ad, edit a
     `[link, image, alt text]` row there; the `<img>` has no `src` in the markup so only the chosen
     image downloads.
   - Each banner links to its own page: the left one to the volunteer sign-up; the right one to
