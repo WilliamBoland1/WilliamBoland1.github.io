@@ -258,7 +258,7 @@ body {
   flex: none;                     /* sized to exactly 10 rows; the rules card takes the rest */
   display: flex; flex-direction: column; overflow: hidden;
 }
-#leaderboard {                     /* navy card */
+#leaderboard, #rules {            /* navy card */
   background: linear-gradient(180deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
   border: 1px solid rgba(176, 141, 87, 0.45); border-radius: 18px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(243, 233, 210, 0.06);
@@ -311,42 +311,29 @@ body {
 .lb-empty { padding: 1.5rem; font-size: 0.72rem; line-height: 1.6; color: var(--cream-faint); text-align: center; }
 #lb-footer { flex-shrink: 0; padding: 0.6rem 1.2rem; border-top: 1px solid rgba(176, 141, 87, 0.25); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream-faint); text-align: center; }
 
-/* ── Contest rules: a cream note taped up beside the leaderboard (under the right banner on wide
-   screens). Paper instead of another navy card, so the prize catches the eye; ink-navy text on it. ── */
+/* ── Contest rules: a navy card like the leaderboard, beside it (under the right banner on wide
+   screens). A brighter brass edge, a warm glow at the top and a brass title make the prize stand out. ── */
 #rules {
-  --paper: #EFE4C8; --paper-edge: #E2D3AE; --ink: #1B2A44; --ink-soft: #3A4A66;
-  position: relative; flex: 1 1 auto;
-  padding: 1.15rem 1.1rem 1rem;
-  color: var(--ink);
-  background: linear-gradient(180deg, #F4EBD3 0%, var(--paper) 55%, var(--paper-edge) 100%);
-  border-radius: 3px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 10px 24px rgba(0, 0, 0, 0.4), 0 2px 0 rgba(7, 21, 42, 0.6);
-  transform: rotate(-0.8deg);
-}
-/* strip of tape holding the note up */
-#rules .tape {
-  position: absolute; top: -10px; left: 50%; width: 76px; height: 22px; margin-left: -38px;
-  background: rgba(236, 222, 186, 0.62);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  transform: rotate(3deg);
+  flex: 1 1 auto; padding: 1rem 1.2rem 1.1rem;
+  border-color: var(--brass);
+  background:
+    radial-gradient(120% 70% at 0% 0%, rgba(220, 192, 138, 0.16), rgba(220, 192, 138, 0) 70%),
+    linear-gradient(180deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
 }
 .rules-head { display: flex; align-items: center; gap: 0.6rem; }
-.beer-icon { width: 44px; height: 44px; flex-shrink: 0; }
-.mug-handle { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
-.mug-beer { fill: #D99A3C; stroke: var(--ink); stroke-width: 2.2; }
-.mug-shine { fill: rgba(255, 244, 214, 0.6); }
-.mug-bubble { fill: rgba(255, 244, 214, 0.75); }
-.mug-foam { fill: #FFFBF0; stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
-#rules-title { font-family: var(--font-title); font-weight: 600; font-size: 1.45rem; line-height: 1.05; color: var(--ink); }
+.beer-icon { width: 30px; height: 30px; flex-shrink: 0; fill: none; stroke: var(--brass-light); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+#rules-title { font-family: var(--font-title); font-weight: 600; font-size: 1.35rem; line-height: 1.1; color: var(--brass-light); }
 .rules-label {
-  margin: 0.85rem 0 0; padding-top: 0.6rem; border-top: 1px dashed rgba(27, 42, 68, 0.35);
-  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brass-dark);
+  margin-top: 0.8rem; padding-top: 0.6rem; border-top: 1px solid rgba(176, 141, 87, 0.25);
+  font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass-light); opacity: 0.8;
 }
-.rules-text { padding-top: 0.45rem; font-size: 0.7rem; line-height: 1.6; color: var(--ink-soft); }
-.rules-text p + p { margin-top: 0.5rem; }
-.rules-text strong, .rules-text a { color: var(--ink); font-weight: 600; }
+/* numbered, with wrapped lines hanging under the text instead of under the number */
+.rules-text { padding: 0.45rem 0 0 3ch; font-size: 0.7rem; line-height: 1.6; color: var(--cream-dim); text-wrap: pretty; }
+.rules-text li + li { margin-top: 0.5rem; }
+.rules-text li::marker { color: var(--brass-light); font-weight: 600; }
+.rules-text strong, .rules-text a { color: var(--cream); font-weight: 600; }
 .rules-text a { text-decoration-color: var(--brass); text-underline-offset: 2px; }
-.rules-text a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.rules-text a:focus-visible { outline: 2px solid var(--brass-light); outline-offset: 2px; }
 
 /* Wide screens (side banners showing): a grid of left banner, game, leaderboard, and a right column
    where a shorter right banner sits over the rules card. Every column is as tall as the game frame.
