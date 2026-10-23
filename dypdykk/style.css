@@ -352,23 +352,30 @@ body {
 @media (min-width: 1240px) {
   #layout {
     display: grid; justify-content: center; align-items: stretch;
-    grid-template-columns: auto auto var(--lb-w) auto;
+    grid-template-columns: var(--left-w) auto var(--lb-w) var(--right-w);
     grid-template-rows: 1fr auto;   /* the rules card takes its own height; the right banner gets the rest */
     grid-template-areas: "ad-left game board ad-right" "ad-left game board rules";
     column-gap: var(--col-gap); row-gap: 14px;
   }
-  /* Room beside the game for both side columns. The right column (banner over the rules note) gets
-     58 % of it so the note has space; the left banner gets the rest. Both stop at the artwork's
-     1:2 shape, so on very wide screens they are equal again. */
-  #layout { --side-room: calc(100vw - var(--content-w) - 2 * var(--gutter) - 2 * var(--col-gap)); }
+  /* Room beside the game for both side columns, split so the game sits in the middle of the screen:
+     the left column is as wide as everything right of the game (leaderboard, gap, right column).
+     The right column (banner over the rules note) gets half of what the leaderboard leaves, but at
+     least 260px so the note stays readable (never more than v127's 58 %, so the left banner is never
+     narrower than before) and at most the artwork's 1:2 shape. The game is exactly centred from
+     about 1660px wide; below that the note's floor pushes it left as little as it can. */
+  #layout {
+    --side-room: calc(100vw - var(--content-w) - 2 * var(--gutter) - 2 * var(--col-gap));
+    --right-w: clamp(min(260px, var(--side-room) * 0.58),
+                     (var(--side-room) - var(--lb-w) - var(--col-gap)) / 2, var(--frame-h) / 2);
+    --left-w: min(var(--side-room) - var(--right-w), var(--right-w) + var(--lb-w) + var(--col-gap));
+  }
   .side-ad.ad-right {
     grid-area: ad-right; height: auto;   /* stretches to what the rules note leaves */
-    width: min(calc(var(--frame-h) / 2), calc(var(--side-room) * 0.58));
+    width: auto;                         /* fills the column */
   }
-  .side-ad.ad-left {
-    grid-area: ad-left;
-    width: min(calc(var(--frame-h) / 2),
-               calc(var(--side-room) - min(calc(var(--frame-h) / 2), calc(var(--side-room) * 0.58))));
+  .side-ad.ad-left {                     /* at most 1:2, next to the game; any extra room stays empty outside it */
+    grid-area: ad-left; justify-self: end;
+    width: min(calc(var(--frame-h) / 2), 100%);
   }
   #game-wrap { grid-area: game; }
   #sidebar { display: contents; }

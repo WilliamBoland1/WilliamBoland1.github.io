@@ -71,6 +71,7 @@ If a request conflicts with one of these rules, ask William before doing it.
 | **Steel frames on the side banners** (`?v=125`, CSS only). Each `.side-ad` gets a 3 px brushed-steel frame (`--steel-light`, `--steel`, `--steel-dark`, lit from the top left like the brass game frame), a 1 px dark outline outside it and a faint light edge inside it (`::after`). The artwork fills the inside of the frame, so it is 6 px narrower and shorter than before; the safe zone in "Swap a side banner" still holds. | The banners were borderless, so dark artwork melted into the navy page and light artwork looked pasted on. Steel is a different metal from the game's brass, so the ads read as separate from the game and the cards while keeping the calm heritage look (rule 5). Steel is used for the ads only. No JS changed. |
 | **Rules under a shorter right banner** (`?v=126`, HTML/CSS only). With the side banners showing (1240 px and wider) `#layout` becomes a grid: left banner, game, leaderboard, and a right column where the right banner sits over the rules card. Every column is as tall as the game frame. `#sidebar` gets `display: contents` there, so the leaderboard and the rules card take grid cells of their own; the banners are told apart by `.ad-left` and `.ad-right`. The rules card is pinned to the banner's width (`width: 0; min-width: 100%`), and the right banner takes whatever height the rules card leaves. The leaderboard now fills the frame height alone, so its 10 rows share it (`.lb-row` 10 % of the list, about 63 px at full size). Below 1240 px, on tablets and in the phone sheet, nothing changed. | The rules and prize belong where people look for them, beside the banners instead of squeezed under the leaderboard. The right banner's crop changes with it; see "Swap a side banner". `scoreboard.js` and `leaderboard-fx.js` are untouched. No JS changed. |
 | **Rules as a cream note with the prize up front** (`?v=127`, HTML/CSS only). The rules card is now a note of cream paper (`--paper`, ink-navy text) with a strip of tape, a slight tilt and a drop shadow. It opens with an inline SVG beer mug and the headline "Vinn en ølbong", then a small "Regler" label over the rules; the prize line became "Beste spiller og én tilfeldig deltaker vinner hver sin." On wide screens the right column (banner over the note) gets 58 % of the room beside the game and the left banner the rest (`--side-room`); both still stop at the banners' 1:2 shape. At 1440×900 the note grows from 279 to 324 px wide. | The prize should catch the eye: a paper note stands out among the navy cards and fits the heritage look. The wider column gives the headline room; the price is a narrower left banner on laptops (see "Swap a side banner"). The same note shows in the tablet column and the phone sheet. No JS changed. |
+| **Game centred on wide screens** (`?v=128`, CSS only). With the side banners showing, the columns are sized so the game sits in the middle of the screen: the left column is as wide as everything right of the game (leaderboard, gap, right column), and the right column gets half of what the leaderboard leaves (`--right-w`, `--left-w` in `#layout`). The right column never drops under 260 px (or v127's 58 %, if that is less) and never exceeds the artwork's 1:2 shape; the left banner never exceeds 1:2 either and sits next to the game (`justify-self: end`), so on very wide screens the spare room is empty navy at the far left. Exactly centred from about 1660 px wide (1920×1080: banner 384, right column 382); below that the note's floor pushes the game left as little as it can (1440×900: about 120 px off centre instead of 180; 1490×754: 77 instead of 185). At 1240 px nothing changed. | The game is the point of the page, and with the leaderboard and the right column on one side it sat well left of centre. Widths are the only thing that moves: same order, same cards. 260 px is the width v127 already gave the note at 1280 px, so it stays readable; lower it to centre more on laptops at the cost of a narrower note. No JS changed. |
 
 ## Architecture
 
@@ -151,14 +152,16 @@ near snow → seabed strip → bubbles, headlamp, ROV.
 - **Swap a side banner:** save it as `ads/banner-venstre.jpg` or `ads/banner-hoyre.jpg`; no code
   change is needed.
   - Make it a JPG at 1000 × 2000 px, quality about 80, under about 300 KB.
-  - Left banner: the full height always shows. Since `?v=127` it gets the smaller share of the
-    room beside the game, so its sides are cropped more: about 600 px of the 1000 px width show at
-    1440×900 and about 540 px at 1280×720 (the full width shows from about 1700 px wide).
-    **Keep text and logos inside the central 540 px of width.**
+  - Left banner: the full height always shows. Since `?v=128` its column is as wide as everything
+    right of the game, so it shows more than before: the full width from about 1530 px wide,
+    about 770 px of the 1000 px width at 1440×900, and about 540 px at 1280×720 (about 380 px at
+    1240×800, the narrowest wide layout). **Keep text and logos inside the central 540 px of width.**
   - Right banner: it shares its column with the rules card (`?v=126`), so it is shorter and its shape
-    changes with the screen: about 1:2.7 at 1240 px wide (sides cropped), about 1:2 at 1280 to 1440 px
-    (nearly all of it shows), and about 1:1.5 at 1920×1080, where roughly 230 px are cut off the top
-    and the bottom. **Keep text and logos inside the central 640 × 1500 px.**
+    changes with the screen. Since `?v=128` the column is 260 px wide on laptops and grows to the
+    1:2 width only at about 1920 px wide: about 1:2.3 at 1240×800 (sides cropped to about 840 px),
+    about 1:1.9 at 1440×900 and 1:1.8 at 1490×754 (nearly all of it shows), and about 1:1.4 at
+    1920×1080, where roughly 285 px are cut off the top and the bottom.
+    **Keep text and logos inside the central 640 × 1400 px.**
   - Each banner links to its own page: the left one to the volunteer sign-up, the right one to the
     jubilee Facebook page. Change the `href` on the `.side-ad` links in `game.html` to match a new
     banner. They open in a new tab, and switching tabs pauses a running game.
