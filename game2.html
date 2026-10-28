@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0B1F3A"/>
+  <title>Dypdykk 110 · Mannhullet</title>
+  <!-- The dark NTH 110 logo (HANDOVER.md "Favicon") -->
+  <link rel="icon" type="image/png" sizes="32x32" href="dypdykk/img/favicon-32.png"/>
+  <link rel="apple-touch-icon" href="dypdykk/img/apple-touch-icon.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <!-- Bump ?v= on each release so browsers don't mix old and new files -->
+  <link rel="stylesheet" href="dypdykk/style.css?v=133"/>
+</head>
+<body>
+<div id="layout">
+  <!-- Jubilee side banners, wide screens only: see HANDOVER.md "Swap a side banner" -->
+  <a class="side-ad ad-left" href="https://mannhullet.no/jubileum/frivillig.html" target="_blank" rel="noopener">
+    <img src="dypdykk/ads/banner-venstre.jpg" alt="Søk funk på Mannhullets 110-årsjubileum: casino, kultur, arrangement, øl og sprit, vertskap, foto og film. Søknadsfrist 9. november." loading="lazy"/>
+  </a>
+
+  <!-- Brass porthole frame around the game -->
+  <div id="game-wrap">
+    <span class="bolt tl"></span><span class="bolt tc"></span><span class="bolt tr"></span>
+    <span class="bolt ml"></span><span class="bolt mr"></span>
+    <span class="bolt bl"></span><span class="bolt bc"></span><span class="bolt br"></span>
+
+    <div id="viewport">
+      <canvas id="c" width="360" height="540" aria-label="Dypdykk 110"></canvas>
+      <div id="ui">
+        <div id="score-display">0</div>
+
+        <div class="screen" id="start-screen">
+          <!-- Title above the bobbing ROV, controls below it (style.css "Start screen") -->
+          <div class="start-head">
+          <!-- Official NTH 110 jubilee logo, white-ring version for dark backgrounds (HANDOVER.md rule 4) -->
+          <img class="emblem" src="dypdykk/img/logo-nth110.png" width="289" height="336" alt="NTH 110, 1917–2027"/>
+          <div class="screen-title">Dypdykk <span class="num">110</span></div>
+          <div class="screen-sub">Mannhullet 110 år</div>
+          </div>
+          <input class="name-input" id="player-name" type="text" maxlength="24" placeholder="Fullt navn…" autocomplete="name" aria-describedby="name-hint"/>
+          <!-- Contest rule: one leaderboard record per name, only its best score is kept (scoreboard.js) -->
+          <div class="name-hint" id="name-hint"><strong>Bruk fullt navn</strong> for å delta i konkurransen. Ett navn, én poengsum: din beste lagres.</div>
+          <button class="btn" id="start-btn">Start dykket</button>
+          <!-- Phones only: opens the leaderboard and rules as a sheet (style.css) -->
+          <button class="btn secondary info-btn">Toppliste og regler</button>
+          <div class="tip">Trykk eller press mellomrom for å svømme</div>
+        </div>
+
+        <div class="screen hidden" id="over-screen">
+          <div id="medal"></div>
+          <div class="screen-title">Kræsj!</div>
+          <div class="rule"></div>
+          <div class="stat-row">
+            <div class="stat"><div class="stat-label">Poeng</div><div class="stat-val" id="final-score">0</div></div>
+            <div class="stat"><div class="stat-label">Din beste</div><div class="stat-val hi" id="best-score">0</div></div>
+          </div>
+          <button class="btn" id="retry-btn">Prøv igjen</button>
+          <button class="btn secondary" id="menu-btn">Meny</button>
+          <button class="btn secondary info-btn">Toppliste og regler</button>
+          <div id="saving-msg"></div>
+        </div>
+
+        <div class="screen hidden" id="pause-screen">
+          <div class="screen-title">Pause</div>
+          <div class="tip">Trykk eller press mellomrom for å fortsette</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: leaderboard on top, rules below; together as tall as the frame.
+       Wide screens (side banners showing) move the rules under the right banner (style.css).
+       On phones it is hidden and opens as a full-screen sheet instead -->
+  <div id="sidebar">
+    <div id="leaderboard">
+      <div id="lb-header">
+        <div id="lb-title">Toppliste</div>
+        <div id="lb-sub">Beste poeng per spiller · Topp 10</div>
+      </div>
+      <!-- brass divider with a small porthole in the middle -->
+      <div class="lb-ornament" aria-hidden="true">
+        <span class="lb-ornament-line"></span>
+        <svg viewBox="0 0 16 16"><g id="orn">
+          <circle class="orn-ring" cx="8" cy="8" r="5.2"/>
+          <g class="orn-bolts">
+            <circle cx="8" cy="2.8" r="0.8"/><circle cx="13.2" cy="8" r="0.8"/>
+            <circle cx="8" cy="13.2" r="0.8"/><circle cx="2.8" cy="8" r="0.8"/>
+          </g>
+        </g></svg>
+        <span class="lb-ornament-line"></span>
+      </div>
+      <div id="lb-list"><div class="lb-empty">Laster…</div></div>
+      <div id="lb-footer">Oppdateres live</div>
+    </div>
+
+    <!-- Prize and contest rules: a navy card like the leaderboard, under the right banner (style.css "Contest rules") -->
+    <div id="rules">
+      <div class="rules-head">
+        <!-- Beer mug in brass line art -->
+        <svg class="beer-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>
+          <path d="M17 11h1a3 3 0 0 1 0 6h-1"/>
+          <path d="M9 12v6M13 12v6"/>
+          <path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 2 11 2s2 1.5 3 1.5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/>
+        </svg>
+        <div id="rules-title">Vinn en ØLBONG!!!</div>
+      </div>
+      <div class="rules-label">Regler</div>
+      <!-- Contest rules: fill in the dates for each contest (HANDOVER.md "Update the contest rules") -->
+      <ol class="rules-text">
+        <li>Konkurransen varer fra <strong>27.10</strong> og ut <strong>30.10</strong>.</li>
+        <li>Beste spiller og én tilfeldig deltaker vinner hver sin.</li>
+        <li>Begge må være <a href="https://mannhullet.no/jubileum/frivillig.html" target="_blank" rel="noopener">registrert som funker</a>.</li>
+      </ol>
+    </div>
+
+    <!-- Phones only: closes the sheet -->
+    <button class="btn" id="info-close">Tilbake til spillet</button>
+  </div>
+
+  <!-- Right banner: one of these ads, picked at random on each page load. The image has no src in the
+       markup, so only the chosen ad downloads. crypto, not Math.random: pipe heights use Math.random. -->
+  <a class="side-ad ad-right" target="_blank" rel="noopener"><img loading="lazy"/></a>
+  <script>
+    {
+      const ads = [   // [link, image, alt text]
+        ['https://www.facebook.com/p/110-%C3%A5rs-jubileum-Mannhullet-61590599620480/', 'dypdykk/ads/banner-hoyre.jpg', 'Følg Mannhullets 110-årsjubileum på Facebook'],
+        ['https://mannhullet.no/jubileum/frivillig.html', 'dypdykk/ads/banner-funk.jpg', 'Har du søkt funk? Bli frivillig på Mannhullets 110-årsjubileum'],
+        ['https://www.instagram.com/jub110_mannhullet/', 'dypdykk/ads/banner-tierlist.jpg', 'Marin IG tier list: jub110_mannhullet alene på topp. Følg!'],
+      ];
+      const [href, src, alt] = ads[crypto.getRandomValues(new Uint8Array(1))[0] % ads.length];
+      const ad = document.querySelector('.ad-right');
+      ad.href = href; Object.assign(ad.querySelector('img'), { src, alt });
+    }
+  </script>
+</div>
+
+<script type="module" src="dypdykk2/js/main.js?v=133"></script>
+</body>
+</html>
